@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="光溯 LightTrace 复杂金融业务链路智能诊断平台产品概览。">
+<title>光溯 LightTrace · 产品概览</title>
+<link rel="stylesheet" href="guangsu-site.css">
+<style>
+.v2-note{margin-top:14px;padding:12px 15px;border-left:3px solid var(--blue);background:var(--soft);color:var(--muted);font-size:11px;line-height:1.55}
+.path-head{margin-bottom:20px}.path-head+.path-head{margin-top:2px}.path-head h2{max-width:34em}.path-head p{max-width:46em}
+.section:has(.reading-grid) .head h2{font-size:clamp(20px,1.8vw,24px);line-height:1.32}
+.hero-proof{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}.hero-proof img{aspect-ratio:16/9;object-fit:cover;object-position:center top;border:0;border-radius:0;opacity:0}
+.compare-grid,.capability-grid{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;border:1px solid var(--line2);border-radius:var(--radius);background:var(--surface)}
+.compare-grid article,.capability-grid article{padding:20px}.compare-grid article+article,.capability-grid article+article{border-left:1px solid var(--line)}
+.compare-grid h3,.capability-grid h3{margin:0 0 10px;font-size:15px}.compare-grid p,.capability-grid p{margin:0;color:var(--muted);font-size:11px;line-height:1.55}.compare-grid article:first-child{background:rgba(255,255,255,.7)}.compare-grid article:last-child{background:var(--soft)}
+.flow-band{display:grid;grid-template-columns:repeat(6,1fr);overflow:hidden;border:1px solid var(--line2);border-radius:var(--radius);background:var(--surface)}
+.flow-band span{position:relative;padding:18px 12px;color:var(--ink);font-size:11px;font-weight:720;text-align:center}.flow-band span+span{border-left:1px solid var(--line)}.flow-band span+span:before{content:'→';position:absolute;left:-8px;top:18px;color:var(--blue);font-weight:800;background:var(--surface)}
+.principle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.principle-grid article{padding:20px;border:1px solid var(--line2);border-radius:14px;background:var(--surface)}.principle-grid b{display:block;margin-bottom:8px;font-size:14px}.principle-grid p{margin:0;color:var(--muted);font-size:11px;line-height:1.55}
+@media(max-width:900px){.flow-band{grid-template-columns:repeat(3,1fr)}.flow-band span:nth-child(4){border-left:0;border-top:1px solid var(--line)}.flow-band span:nth-child(n+5){border-top:1px solid var(--line)}.flow-band span:nth-child(4):before,.flow-band span:nth-child(5):before,.flow-band span:nth-child(6):before{display:none}.principle-grid{grid-template-columns:1fr}.compare-grid,.capability-grid{grid-template-columns:1fr}.compare-grid article+article,.capability-grid article+article{border-left:0;border-top:1px solid var(--line)}}
+@media(max-width:680px){.flow-band{grid-template-columns:1fr}.flow-band span+span,.flow-band span:nth-child(n+4){border-left:0;border-top:1px solid var(--line)}.flow-band span+span:before{display:none}}
+@media(max-width:680px){.path-head{margin-bottom:18px}.path-head+.path-head{margin-top:0}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+<nav class="nav"><div class="shell navin"><a class="brand" href="index.html"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85M7 16.5l5-3M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3m5 3 4.74-2.85M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15M12 8l4.74-2.85M12 13.5V8"/></svg></span><span>光溯<small>故障诊断平台</small></span></a><div class="links"><a aria-current="page" href="index.html">产品概览</a><a href="architecture.html">架构设计</a><a href="case-study.html">诊断案例</a><a href="evidence.html">评测与治理</a><a class="demo" href="https://aiops.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a></div></div></nav>
+<main id="main">
+<header class="hero"><div class="shell hero-grid"><div><h1><span class="title-label">光溯 · LightTrace</span><span class="title-main">复杂金融业务链路智能诊断</span></h1><p class="subhead">从一句模糊报错，到一条可复核的诊断路径</p><p class="lead">将业务场景、链路、日志与知识组织为同一诊断上下文，输出有证据可回看的候选原因与待核动作。</p><div class="actions"><a class="btn primary" href="case-study.html">查看诊断案例</a><a class="btn" href="architecture.html">了解架构设计</a><a class="text-link" href="https://aiops.litrace.site/" target="_blank" rel="noreferrer">体验 Demo →</a></div><div class="v2-note">公开 Demo 使用匿名模拟数据演示产品机制；原课题规模与验证边界分别在架构、评测页说明。</div></div><figure class="product-frame hero-proof"><img src="assets/hero-cross-layer.png" alt="光溯跨层诊断工作台视觉"></figure></div></header>
+
+<section class="section path-section"><div class="shell"><div class="head path-head"><div class="label">核心问题</div><div><h2>业务现象与技术根因之间，缺少可复用的诊断链路</h2><p>复杂金融交易链路长、跨团队多，故障片段分散在不同角色和系统中，结论容易依赖个人经验。</p></div></div><div class="head path-head"><div class="label">产品定位</div><div><h2>把跨团队排障，收束成一条可执行的诊断任务</h2><p>光溯把各角色看到的故障片段重新组织为可解释、可回放的诊断上下文。</p></div></div><div class="compare-grid"><article><h3>传统：上下文随团队边界断裂</h3><p>报错截图在群里转交；各团队只查看自己负责的系统；结论依赖个人经验，处理动作散落在聊天记录中。</p></article><article><h3>光溯：上下文沿业务链路收敛</h3><p>从业务现象开始，自动补齐场景与链路；跨应用、网络、系统和数据库层取证；输出候选原因、证据摘要与待核动作。</p></article></div></div></section>
+
+<section class="section"><div class="shell"><div class="head"><div class="label">核心能力</div><div><h2>复杂性由系统承担，使用者看到一条清晰路径</h2><p>光溯不是把所有工具交给 Agent 自由调用，而是把每个关键判断放进可验证的产品流程。</p></div></div><div class="capability-grid"><article><h3>理解复杂业务场景</h3><p>支持文本与截图输入，先识别业务现象、环境和关键上下文，再判断是否进入深度链路诊断。</p></article><article><h3>组织跨层级取证</h3><p>业务拓扑、日志检索、知识库与专业诊断工具组成 Agent 工作流，依据已有证据按需决定下一步。</p></article><article><h3>输出可复核结果</h3><p>同时呈现候选原因、关键证据和待核动作；证据不足时保留不确定性并转入人工确认。</p></article><article><h3>让诊断能力持续变好</h3><p>每次诊断留下可回放 Trace，支撑失败归因、回归评测和知识更新，而不是把一次回答当作终点。</p></article></div></div></section>
+
+<section class="section alt"><div class="shell"><div class="head"><div class="label">诊断流程</div><div><h2>从输入报错，到证据约束的待核动作</h2><p>主流程保持确定性，专项诊断只在证据满足条件时触发；没有触发的分支也被记录。</p></div></div><div class="flow-band" aria-label="光溯核心诊断流程"><span>输入报错或截图</span><span>理解业务场景</span><span>匹配应用链路</span><span>检索日志与知识</span><span>按证据调用诊断能力</span><span>输出待核动作</span></div><div class="v2-note">用户看到的是一条清晰路径，系统内部保留场景识别、日志证据、知识命中、工具调用、未触发分支和报告门禁，方便复核与迭代。</div></div></section>
+
+<section class="section"><div class="shell"><div class="head"><div class="label">产品判断</div><div><h2>三个设计选择，定义光溯与通用 Chatbot 的边界</h2><p>产品差异不在于“能调用多少工具”，而在于什么时候允许系统继续判断。</p></div></div><div class="principle-grid"><article><b>先确认场景，再锁定链路</b><p>业务场景决定应用链路，链路决定日志范围，日志决定异常位置，模型不能跳过中间环节直接编结论。</p></article><article><b>两阶段检索，各自解决不同问题</b><p>RAG-1 面向用户原始描述，负责及时回应与补齐信息；RAG-2 面向日志异常，负责收敛处理知识和处置动作。</p></article><article><b>结论必须指回证据</b><p>每个根因判断都要回溯到日志片段、接口关系或知识条目；证据不足时输出候选原因并转人工复核。</p></article></div></div></section>
+
+<section class="section alt"><div class="shell"><div class="head"><div class="label">试点价值 · 公开口径</div><div><h2>从跨团队人工拼接，到由 AI 组织上下文并沿链路取证</h2><p>原试点核心长链路场景体现了分钟级定位、20+ 节点全链路、跨部门协同人力下降与根因准确率提升等价值。公开页面与 Demo 使用匿名模拟数据，不把试点数字表述为公开 Demo 的独立测量结果。</p></div></div><div class="metric-chips"><span><strong>分钟级</strong>定位复杂问题</span><span><strong>20+</strong> 节点全链路</span><span><strong>-75%</strong> 协同人力</span><span><strong>&gt;85%</strong> 原试点根因准确率</span></div><div class="actions"><a class="btn primary" href="case-study.html">看完整诊断回放</a><a class="btn" href="evidence.html">看质量治理闭环</a></div></div></section>
+
+<section class="section alt reading-section"><div class="shell"><div class="head"><div class="label">继续深读</div><div><h2>跟一条诊断，查看主流程与质量门禁</h2><p>从主案例确认产品机制，再按需要深读架构或验证体系。</p></div></div><div class="reading-grid reading-rail"><a href="case-study.html">跟一条登录失败诊断<small>从场景确认到证据约束报告</small></a><a href="architecture.html">看主流程与条件 Skills<small>诊断引擎、四域能力与关键取舍</small></a><a href="evidence.html">核验契约与证据边界<small>Trace、契约、Bad Case 与知识闭环</small></a></div></div></section>
+</main>
+<footer class="footer"><div class="shell footin"><div class="foot-links"><span class="copyright">Wang Yuxuan</span><a href="resume/" target="_blank" rel="noreferrer">Resume</a><a href="mailto:wangyx9621@163.com">Email</a><a href="https://github.com/Yuxuan-23" target="_blank" rel="noreferrer">GitHub</a></div></div></footer>
+</body></html>
