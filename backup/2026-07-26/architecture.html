@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="光溯智能诊断平台的架构设计、关键决策与能力边界。">
+<title>光溯 · 架构设计</title>
+<link rel="icon" type="image/svg+xml" href="guangsu-logo.svg">
+<link rel="stylesheet" href="guangsu-site.css">
+<style>
+.architecture-intro{padding:34px 0 10px}.principles{display:flex;flex-wrap:wrap;gap:7px;margin-top:16px}.principles span{padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--blue2);font-size:11px;font-weight:720}.decision-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.decision-card{padding:21px;border:1px solid var(--line2);border-radius:14px;background:var(--surface)}.decision-card .index{display:block;margin-bottom:20px;color:var(--blue);font:700 11px ui-monospace,SFMono-Regular,Menlo,monospace}.decision-card h3{margin:0 0 8px;font-size:17px;line-height:1.35}.decision-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}.decision-card .rule{margin-top:15px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink);font-size:11px;font-weight:650}.decision-card .rule b{color:var(--blue2)}.tradeoff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tradeoff{padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.tradeoff b{display:block;margin-bottom:6px;font-size:14px}.tradeoff span{display:block;margin-bottom:8px;color:var(--blue);font-size:10px;font-weight:760}.tradeoff p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}.domain-note{margin-top:14px;padding:13px 15px;border-left:3px solid var(--blue);background:var(--soft);color:var(--muted);font-size:11px;line-height:1.55}.mt-12{margin-top:12px}.scale-extensions{display:grid;grid-template-columns:.8fr 1.2fr;gap:14px}.scale-panel{padding:25px;border-radius:18px;background:var(--ink);color:#fff}.scale-panel .eyebrow,.extension-panel .eyebrow{margin:0 0 10px;color:#9cb8ff;font-size:10px;font-weight:760}.scale-panel h3{margin:0 0 16px;font-size:23px;line-height:1.28;letter-spacing:-.03em}.scale-list{display:grid;gap:9px;margin:0;padding:0;list-style:none}.scale-list li{display:flex;justify-content:space-between;gap:12px;padding-top:9px;border-top:1px solid rgba(255,255,255,.15);color:#bac6d9;font-size:11px}.scale-list strong{color:#fff;font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace}.extension-panel{padding:25px;border:1px solid var(--line2);border-radius:18px;background:var(--surface)}.extension-panel h3{margin:0 0 15px;font-size:20px}.extension-grid{display:grid;grid-template-columns:repeat(2,1fr);overflow:hidden;border:1px solid var(--line);border-radius:11px}.extension{padding:15px}.extension:nth-child(even){border-left:1px solid var(--line)}.extension:nth-child(n+3){border-top:1px solid var(--line)}.extension b{display:block;margin-bottom:5px;font-size:12px}.extension p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.45}.reading-grid{display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;border:1px solid var(--line2);border-radius:14px;background:var(--surface)}.reading-grid a{padding:18px;color:var(--blue2);font-size:12px;font-weight:720}.reading-grid a+a{border-left:1px solid var(--line)}.reading-grid small{display:block;margin-top:5px;color:var(--muted);font-size:10px;font-weight:500;line-height:1.45}.fusion-note{margin-top:14px;padding:12px 14px;border:1px dashed var(--line2);border-radius:10px;color:var(--muted);font-size:11px;background:rgba(255,255,255,.5)}
+
+/* Architecture hierarchy: the page labels carry the section map, while the
+   major titles use Songti for a quieter editorial voice. This is scoped to
+   this page because the shared stylesheet serves several case-study pages. */
+.pagehead .kicker,
+.section .head .label{
+  color:var(--blue2);
+  font-family:"Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.04em;
+  line-height:1.35;
+}
+.pagehead .kicker{margin-bottom:14px}
+.pagehead h1,
+.section .head h2{
+  font-family:"Songti SC","STSong","SimSun","Noto Serif CJK SC",serif;
+  font-weight:600;
+  letter-spacing:.015em;
+}
+.section .head .label{
+  display:inline-flex;
+  width:max-content;
+  min-height:36px;
+  align-items:center;
+  padding:6px 12px 7px 11px;
+  border-left:3px solid var(--blue);
+  border-block:1px solid var(--line2);
+  background:var(--soft);
+  color:var(--blue2);
+  font-family:"SF Pro Display","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  font-size:15px;
+  font-weight:720;
+  letter-spacing:.02em;
+  line-height:1.35;
+}
+.pagehead h1{
+  max-width:12em;
+  font-size:clamp(32px,3.2vw,44px);
+  line-height:1.18;
+  letter-spacing:.01em;
+}
+.pagehead .subhead{margin:10px 0 0;color:var(--blue2);font-size:15px;font-weight:600;line-height:1.4}
+.pagehead .lead{max-width:42em;margin-top:8px;color:var(--ink);font-size:14px;line-height:1.55}
+.pagehead .shell{display:block}
+.pagehead-copy{min-width:0}
+.pagehead-visual{display:none}
+.pagehead-visual::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(242,247,255,.62),transparent 35%,rgba(242,247,255,.04));pointer-events:none}
+.pagehead-visual img{display:block;width:100%;height:100%;min-height:280px;object-fit:cover;object-position:center;mix-blend-mode:multiply;opacity:.78}
+.section .head h2{max-width:30em;font-size:clamp(20px,1.8vw,24px);line-height:1.32;text-wrap:balance}
+.section .head p{max-width:46em;margin-top:8px;color:var(--ink);font-size:13px;line-height:1.55}
+.decision-card h3{font-size:16px}
+.decision-card p{font-size:12.5px}
+.decision-card .rule{font-size:12px}
+@media(max-width:680px){
+  .pagehead .kicker,
+  .section .head .label{font-size:14px}
+  .section .head .label{min-height:34px;padding:5px 10px 6px 9px}
+  .pagehead .shell{display:block}
+  .pagehead h1{max-width:12em;font-size:30px;line-height:1.22}
+  .pagehead-visual{min-height:180px;margin-top:24px;border-radius:16px}
+  .pagehead-visual img{min-height:180px}
+  .section .head h2{font-size:22px;line-height:1.38}
+}
+@media(max-width:900px){.decision-grid,.tradeoff-grid,.scale-extensions{grid-template-columns:1fr}.extension-grid{grid-template-columns:1fr}.extension:nth-child(even){border-left:0}.extension:nth-child(n+2){border-top:1px solid var(--line)}.reading-grid{grid-template-columns:1fr}.reading-grid a+a{border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<nav class="nav"><div class="shell navin"><a class="brand" href="index.html"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85M7 16.5l5-3M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3m5 3 4.74-2.85M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15M12 8l4.74-2.85M12 13.5V8"/></svg></span><span>光溯<small>故障诊断产品</small></span></a><div class="links"><a href="index.html">产品概览</a><a aria-current="page" href="architecture.html">架构设计</a><a href="case-study.html">诊断案例</a><a href="evidence.html">评测与治理</a><a class="demo" href="https://app.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a></div></div></nav>
+
+<header class="pagehead"><div class="shell"><div class="pagehead-copy"><h1><span class="title-label">架构设计 ·</span><span class="title-main">诊断流程与能力架构</span></h1><p class="subhead">边界、证据与可回放主流程</p><p class="lead">从业务报错，到一个可执行的诊断任务。架构不是技术栈的罗列，而是一组围绕诊断边界、证据约束和质量回放做出的产品设计决策。</p><div class="principles"><span>统一诊断上下文</span><span>固定主流程 + 条件 Skills</span><span>两阶段检索</span><span>证据约束报告</span><span>四域共享底座</span></div></div></div></header>
+
+<main>
+<section class="section" id="complete-architecture"><div class="shell"><div class="head"><div class="label">能力架构</div><div><h2>四域能力，一套证据底座</h2><p>产品将业务、应用、网络和系统四个诊断域组织在同一套证据、知识和质量框架中。每个域保持自己的入口与知识资产，诊断引擎负责统一上下文和跨层路由。</p></div></div><div class="enterprise-arch" aria-label="光溯四域诊断能力架构">
+<div class="ea-row"><div class="ea-label">用户交互</div><div class="ea-body"><div class="support-grid"><div class="support-block"><b>多维检索入口</b><span>场景、报错信息、交易关键字、环境与时间窗口</span></div><div class="support-block"><b>对话问答入口</b><span>自然语言、截图解析、追问与场景确认</span></div><div class="support-block"><b>诊断工作台</b><span>左侧对话，右侧链路、进度、决策卡和证据抽屉</span></div></div></div></div>
+<div class="ea-row"><div class="ea-label blue">四域诊断框架</div><div class="ea-body"><div class="domain-heads"><div class="domain-head">业务域</div><div class="domain-head">应用域</div><div class="domain-head">网络域</div><div class="domain-head">系统域</div></div><div class="domain-body"><div class="domain-col"><b>业务交易报错助手</b><ul><li>场景识别与关键字段</li><li>交易链路匹配</li><li>业务场景知识库</li></ul></div><div class="domain-col"><b>应用日志分析</b><ul><li>应用与节点定位</li><li>异常片段与错误分类</li><li>应用处理知识</li></ul></div><div class="domain-col"><b>网络诊断</b><ul><li>连通性与策略证据</li><li>条件触发网络 Skill</li><li>网络知识库</li></ul></div><div class="domain-col"><b>系统诊断</b><ul><li>数据库与中间件线索</li><li>资源与状态分析</li><li>系统知识库</li></ul></div></div></div></div>
+<div class="ea-row"><div class="ea-label">诊断引擎</div><div class="ea-body"><div class="support-grid"><div class="support-block"><b>统一诊断上下文</b><span>汇总场景、环境、现象、定位主键、时间与候选链路</span></div><div class="support-block"><b>确定性主流程 + 条件 Skills</b><span>固定主流程、条件路由、工具调用，未触发的分支也留痕</span></div><div class="support-block"><b>证据约束报告</b><span>候选原因、日志/知识引用、待核动作与人工复核</span></div></div></div></div>
+<div class="ea-row"><div class="ea-label">数据与知识</div><div class="ea-body"><div class="support-grid"><div class="support-block"><b>业务拓扑与链路</b><span>匿名应用、节点、接口关系和日志路径</span></div><div class="support-block"><b>日志与观测证据</b><span>关键字、Trace、异常片段和工具结果</span></div><div class="support-block"><b>版本化知识资产</b><span>错误码、处置手册、历史案例、适用范围与来源</span></div></div></div></div>
+<div class="ea-row"><div class="ea-label blue">技术与质量支撑</div><div class="ea-body"><div class="support-grid"><div class="support-block"><b>模型与检索</b><span>意图识别、中文向量化、向量检索与多模态理解</span></div><div class="support-block"><b>回放与标注样本</b><span>路径、工具、证据、人工标注与固定契约样本</span></div><div class="support-block"><b>评测与护栏</b><span>检索评测、路径评测、禁止断言、失败归因与版本回归</span></div></div></div></div></div><div class="domain-note"><b>四域共享底座的原因</b>业务报错常先落到应用异常，例如 RPC 超时；再决定是否需要网络或系统证据。共享上下文，跨层路由和责任边界才能同时成立。</div></div></section>
+<section class="section"><div class="shell"><div class="head"><div class="label">诊断流程</div><div><h2>条件诊断主流程</h2><p>先确认业务场景，再进入条件诊断。首轮回应与候选场景识别并行发生，避免模糊报错触发全部工具。只有形成统一诊断上下文，系统才开始沿业务链路取证。</p></div></div><div class="diagnosis-flow" aria-label="光溯智能问答诊断流程图">
+<div class="df-main"><div class="df-node"><b>用户输入</b><span>报错现象、环境、截图和关键字段</span></div><div class="df-arrow">→</div><div class="df-node intent"><b>意图识别</b><span>判断业务场景、应用、系统或网络问题</span></div><div class="df-arrow">→</div><div class="df-parallel"><div class="df-node rag"><b>领域知识检索与首轮回答</b><span>按意图进入对应知识域，检索后给出证据摘要与补充信息建议</span></div><div class="df-node scene"><b>候选场景识别</b><span>并行匹配业务场景库，返回候选并等待用户选择</span></div></div><div class="df-arrow">→</div><div class="df-node confirm"><b>用户确认业务场景？</b><span>确认场景并补齐深度诊断所需关键字段</span></div></div>
+<div class="df-branch-label">场景确认后的两条路径</div><div class="df-branches"><div class="df-branch"><b>否：留在领域内自助问答</b><span>应用、系统、网络类问题继续在对应知识域内多轮问答，不进入链路、日志和最终诊断报告。</span></div><div class="df-branch"><b>是：形成统一诊断上下文</b><span>把场景、环境、现象、定位主键、时间窗口和候选链路，组织成一个可执行的诊断任务。</span></div></div>
+<div class="df-branch-label">业务场景深度诊断</div><div class="df-deep"><div class="df-node"><b>获取业务链路</b><span>匹配应用、节点、接口与日志路径</span></div><div class="df-node"><b>沿链路检索日志</b><span>定位异常节点并提取证据片段</span></div><div class="df-node rag"><b>异常定向知识检索</b><span>使用异常节点与错误模式查处理知识</span></div><div class="df-node intent"><b>条件 Skills</b><span>证据满足才调用网络或系统诊断</span></div><div class="df-node confirm"><b>报告门禁</b><span>检查证据引用、禁止断言和置信边界</span></div><div class="df-node"><b>结论或人工复核</b><span>输出候选原因与待核动作，证据不足转人工</span></div></div><div class="df-note"><b>两次检索的差异：</b>首轮检索基于用户的原始问题，目标是及时回应、补齐信息；深度诊断中的异常定向检索基于实际的日志证据，目标是收敛处理知识。它们不是同一个步骤重复了两次。</div></div><div class="fusion-note">这张图描述的是跨场景可复用的主流程；具体的手机银行登录回放与证据结果，放在“诊断案例”页展开。</div></div></section>
+
+<section class="section alt"><div class="shell"><div class="head"><div class="label">设计决策</div><div><h2>三个行为边界</h2><p>这三个选择决定系统的行为边界。诊断引擎区别于通用 Chatbot 的地方，不在于“能调用多少工具”，而在于什么时候允许系统继续判断。</p></div></div><div class="decision-grid"><article class="decision-card"><span class="index">DECISION 01</span><h3>先确认场景，再形成任务</h3><p>“登录报错了”或一张截图不足以确定业务边界。首轮先做领域回应和候选场景识别，用户确认后才创建诊断任务并关联链路。</p><div class="rule"><b>约束：</b>不让模型在不知道“是什么业务”的情况下直接开始排查。</div></article><article class="decision-card"><span class="index">DECISION 02</span><h3>两次检索，分工不同</h3><p>首轮面向用户知道什么，帮助及时回应和补齐信息；深度检索面向系统发现了什么，基于异常节点和日志证据收敛处理知识。</p><div class="rule"><b>约束：</b>检索时机、输入证据和失败后果都不相同。</div></article><article class="decision-card"><span class="index">DECISION 03</span><h3>主流程固定，子诊断按条件触发</h3><p>场景识别、链路匹配、证据采集和报告生成保持确定性。网络、数据库、系统等专项诊断，仅在证据满足条件时调用。</p><div class="rule"><b>约束：</b>不满足条件时跳过并留痕，保证可回放、可评测。</div></article></div></div></section>
+
+<section class="section alt"><div class="shell"><div class="head"><div class="label">技术取舍</div><div><h2>技术取舍：质量优先</h2><p>编排、推理与评测都服从诊断质量。技术选型不是展示组件名称，而是为了让主流程可控、证据可追溯、结果可回放。</p></div></div><div class="tradeoff-grid"><article class="tradeoff"><span>编排</span><b>LangGraph / StateGraph</b><p>相比纯 Chain 或自由 Agent，更适合表达确定性主流程、条件分支和回放状态。</p></article><article class="tradeoff"><span>推理与多模态</span><b>长上下文模型 + 轻量 VL</b><p>长上下文承接日志与报告引用；截图主要用于提取文本和界面上下文，不把视觉模型当作诊断核心。</p></article><article class="tradeoff"><span>检索与工程</span><b>中文嵌入 + 向量库 + FastAPI</b><p>面向中文专业术语和企业知识资产，工程实现与 LangGraph 生态保持一致。</p></article></div><div class="value-grid mt-12"><article class="value"><h3>编排优先于对话</h3><p>诊断需要先抽取上下文、再采集证据、再给出结论，不能只优化单轮回答。</p></article><article class="value"><h3>证据优先于流畅</h3><p>根因判断必须指回日志片段、接口关系或知识条目，模型表达不能替代根因验证。</p></article><article class="value"><h3>诊断质量优先于回答分数</h3><p>评测关注分类、根因命中、幻觉、建议可执行性和诊断耗时，而不是孤立的文本相关性。</p></article></div></div></section>
+
+<section class="section"><div class="shell"><div class="head"><div class="label">规模与扩展</div><div><h2>从核心工作台延伸到嵌入式 Copilot</h2><p>诊断能力不仅服务于一个前端工作台，也可以嵌入监控、网络、性能测试和部署等技术系统。</p></div></div><div class="scale-extensions"><aside class="scale-panel"><p class="eyebrow">原课题沉淀 · 公开展示边界</p><h3>知识资产进入诊断流程，而不是停留在文档里</h3><ul class="scale-list"><li><span>标准化错误码及解决方案</span><strong>5 万+</strong></li><li><span>应用信息及配置</span><strong>6 万+</strong></li><li><span>平台服务调用链路</span><strong>80 万+</strong></li><li><span>技术手册、测试与安装资料</span><strong>170+</strong></li></ul></aside><div class="extension-panel"><p class="eyebrow">EMBEDDED CAPABILITIES</p><h3>扩展场景共享同一套证据思路</h3><div class="extension-grid"><article class="extension"><b>异常容器监控</b><p>采集 K8s 事件流，分析后推送告警，减少人工翻查。</p></article><article class="extension"><b>智能网络诊断</b><p>把网络节点、策略和异常证据放入同一条诊断路径。</p></article><article class="extension"><b>性能测试分析</b><p>压测后自动拉取日志，结合资产库识别隐藏性能瓶颈。</p></article><article class="extension"><b>版本部署辅助</b><p>捕获流水线报错和日志，给出可复核的处理方向。</p></article></div></div></div><div class="fusion-note">规模数据来自原课题沉淀；公开 Demo 使用公开资料改写的知识卡和匿名 fixture，不将两者混写为同一层生产数据。</div></div></section>
+
+<section class="section alt"><div class="shell"><div class="head"><div class="label">继续深读</div><div><h2>回到产品，跟一条诊断或核验质量边界</h2><p>按阅读目标进入产品定位、主案例回放或评测治理。</p></div></div><div class="reading-grid reading-rail"><a href="index.html">回看产品定位<small>问题、核心能力与设计选择</small></a><a href="case-study.html">跟一条登录失败诊断<small>以手机银行登录为例，走通完整诊断路径</small></a><a href="evidence.html">核验契约与证据边界<small>Trace、契约检查、失败归因与知识治理闭环</small></a></div></div></section>
+</main>
+<footer class="footer"><div class="shell footin"><div class="foot-links"><span class="copyright">Wang Yuxuan</span><a href="resume/" target="_blank" rel="noreferrer">Resume</a><a href="mailto:wangyx9621@163.com">Email</a><a href="https://github.com/Yuxuan-23" target="_blank" rel="noreferrer">GitHub</a><a href="index.html">返回产品概览</a></div></div></footer>
+</body>
+</html>

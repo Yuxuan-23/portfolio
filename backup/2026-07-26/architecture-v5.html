@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="光溯 Agent 产品架构与分岗位面试讲解稿，展示场景资产、Workflow、Skills、MCP、上下文和质量治理的协同关系。">
+  <title>光溯 · Agent Harness 架构与讲解稿</title>
+  <link rel="icon" type="image/svg+xml" href="guangsu-logo.svg">
+  <link rel="stylesheet" href="guangsu-site.css">
+  <style>
+    :root{
+      --a5-ink:#17304d;
+      --a5-muted:#5d7086;
+      --a5-blue:#2458a6;
+      --a5-blue-strong:#1d4c93;
+      --a5-cyan:#2f8290;
+      --a5-line:#d8e3ee;
+      --a5-paper:#ffffff;
+      --a5-wash:#f5f8fc;
+      --a5-radius:16px;
+      --a5-shadow:0 24px 64px rgba(34,68,108,.1);
+    }
+    html{scroll-behavior:smooth}
+    body{color:var(--a5-ink);background:var(--a5-paper)}
+    .a5-hero{padding:64px 0 54px;background:linear-gradient(180deg,#f3f7fc 0%,#fff 100%)}
+    .a5-hero-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(440px,1.1fr);gap:56px;align-items:center}
+    .a5-hero h1{max-width:9.6em;margin:0;font-size:clamp(40px,5vw,66px);line-height:1.02;letter-spacing:-.045em}
+    .a5-hero p{max-width:34em;margin:20px 0 0;color:var(--a5-muted);font-size:17px;line-height:1.68}
+    .a5-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+    .a5-hero figure{overflow:hidden;margin:0;border:1px solid rgba(36,88,166,.18);border-radius:var(--a5-radius);background:#edf4fc;box-shadow:var(--a5-shadow)}
+    .a5-hero img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+    .a5-hero figcaption{display:flex;justify-content:space-between;gap:18px;padding:12px 16px;border-top:1px solid var(--a5-line);color:var(--a5-muted);font-size:12px}
+
+    .a5-section{padding:76px 0}
+    .a5-section.alt{background:var(--a5-wash)}
+    .a5-heading{max-width:790px;margin-bottom:32px}
+    .a5-heading h2{margin:0;font-size:clamp(30px,3.4vw,44px);line-height:1.14;letter-spacing:-.032em}
+    .a5-heading p{max-width:48em;margin:14px 0 0;color:var(--a5-muted);font-size:15px;line-height:1.7}
+    .a5-kicker{display:inline-block;margin-bottom:10px;color:var(--a5-blue);font-size:13px;font-weight:750}
+
+    .a5-boundary{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;padding:26px;border:1px solid var(--a5-line);border-radius:var(--a5-radius);background:#fff}
+    .a5-boundary-intro{padding:10px 12px}
+    .a5-boundary-intro h2{max-width:12em;margin:0;font-size:32px;line-height:1.16}
+    .a5-boundary-intro p{max-width:37em;margin:14px 0 0;color:var(--a5-muted);font-size:14px;line-height:1.7}
+    .a5-statuses{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .a5-status{padding:16px;border-radius:12px;border:1px solid var(--a5-line);background:#f8fafc}
+    .a5-status b{display:block;font-size:13px}
+    .a5-status span{display:block;margin-top:6px;color:var(--a5-muted);font-size:11.5px;line-height:1.5}
+    .a5-status.done{border-color:#bfdcd6;background:#f0f8f6}
+    .a5-status.demo{border-color:#c7d8ef;background:#f1f6fd}
+    .a5-status.design{border-color:#d9d2ed;background:#f7f5fb}
+    .a5-status.future{border-color:#e4ddcf;background:#faf8f3}
+
+    .a5-system{padding:30px;border:1px solid var(--a5-line);border-radius:var(--a5-radius);background:#fff;box-shadow:var(--a5-shadow)}
+    .a5-role-strip{display:grid;grid-template-columns:.94fr 1.02fr 1.14fr;gap:12px;margin-bottom:18px}
+    .a5-role{padding:16px 18px;border-radius:12px;background:#f3f7fc}
+    .a5-role b{display:block;font-size:14px}
+    .a5-role span{display:block;margin-top:6px;color:var(--a5-muted);font-size:12px;line-height:1.5}
+    .a5-role.business{border-left:4px solid #398b98}
+    .a5-role.technical{border-left:4px solid #3970b8}
+    .a5-role.platform{border-left:4px solid #6259a6}
+    .a5-columns{display:grid;grid-template-columns:.92fr 1.18fr 1.05fr .85fr;gap:32px}
+    .a5-column{position:relative;min-width:0;padding:21px;border-radius:14px}
+    .a5-column:not(:last-child)::after{content:"→";position:absolute;top:50%;right:-24px;transform:translateY(-50%);color:var(--a5-blue);font-size:22px;font-weight:750}
+    .a5-column.assets{background:#edf7f5;border:1px solid #cce6e0}
+    .a5-column.runtime{background:#eef4ff;border:1px solid #cedcf2}
+    .a5-column.tools{background:#f3f1fb;border:1px solid #ddd7ef}
+    .a5-column.output{background:#f8f4ed;border:1px solid #e9dfce}
+    .a5-column h3{margin:0;font-size:18px}
+    .a5-column>p{margin:8px 0 17px;color:var(--a5-muted);font-size:12px;line-height:1.52}
+    .a5-stack{display:grid;gap:9px}
+    .a5-unit{padding:12px 13px;border:1px solid rgba(73,103,140,.15);border-radius:10px;background:rgba(255,255,255,.84)}
+    .a5-unit b{display:block;font-size:12.5px}
+    .a5-unit span{display:block;margin-top:4px;color:var(--a5-muted);font-size:11.5px;line-height:1.48}
+    .a5-context{margin-top:18px;padding:22px;border-radius:14px;background:#1f3c5b;color:#f7fbff}
+    .a5-context-head{display:flex;justify-content:space-between;gap:24px;align-items:start}
+    .a5-context-head b{font-size:16px}
+    .a5-context-head span{max-width:48em;color:rgba(247,251,255,.74);font-size:12px;line-height:1.55}
+    .a5-context-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+    .a5-context-grid article{padding:13px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.08)}
+    .a5-context-grid b{display:block;font-size:12px}
+    .a5-context-grid span{display:block;margin-top:5px;color:rgba(247,251,255,.68);font-size:10.5px;line-height:1.48}
+    .a5-governance{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr;align-items:center;margin-top:18px}
+    .a5-governance article{min-height:102px;padding:16px;border:1px solid var(--a5-line);border-radius:12px;background:#fff}
+    .a5-governance b{display:block;font-size:13px}
+    .a5-governance span{display:block;margin-top:6px;color:var(--a5-muted);font-size:11.5px;line-height:1.5}
+    .a5-governance i{color:var(--a5-blue);font-size:19px;font-style:normal;text-align:center}
+    .a5-system-note{margin:16px 0 0;color:var(--a5-muted);font-size:12px;line-height:1.62}
+
+    .a5-role-guide{display:grid;grid-template-columns:280px minmax(0,1fr);gap:26px;align-items:start}
+    .a5-role-tabs{position:sticky;top:92px;display:grid;gap:9px}
+    .a5-role-tab{width:100%;padding:15px 16px;border:1px solid var(--a5-line);border-radius:12px;background:#fff;color:var(--a5-muted);font:inherit;font-size:13px;font-weight:700;text-align:left;cursor:pointer;transition:border-color .18s ease,background .18s ease,color .18s ease,transform .18s ease}
+    .a5-role-tab:hover{border-color:#b8cbe3;color:var(--a5-ink)}
+    .a5-role-tab:active{transform:translateY(1px)}
+    .a5-role-tab[aria-selected="true"]{border-color:var(--a5-blue);background:var(--a5-blue);color:#fff}
+    .a5-role-panel{min-height:520px;padding:30px;border:1px solid var(--a5-line);border-radius:var(--a5-radius);background:#fff;box-shadow:0 18px 50px rgba(34,68,108,.08)}
+    .a5-role-panel[hidden]{display:none}
+    .a5-role-panel h3{max-width:21em;margin:0;font-size:30px;line-height:1.2;letter-spacing:-.025em}
+    .a5-role-panel .focus{margin:13px 0 0;color:var(--a5-blue);font-size:14px;font-weight:700}
+    .a5-script{margin:24px 0 0;padding:22px;border-left:4px solid var(--a5-blue);border-radius:0 12px 12px 0;background:#f3f7fc}
+    .a5-script b{display:block;font-size:13px}
+    .a5-script p{margin:10px 0 0;color:#425c77;font-size:15px;line-height:1.78}
+    .a5-guide-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:18px}
+    .a5-guide-block{padding:18px;border:1px solid var(--a5-line);border-radius:12px;background:#fff}
+    .a5-guide-block h4{margin:0;font-size:14px}
+    .a5-guide-block ul{margin:11px 0 0;padding-left:18px;color:var(--a5-muted);font-size:12.5px;line-height:1.7}
+    .a5-guide-block li+li{margin-top:4px}
+
+    .a5-run{display:grid;grid-template-columns:minmax(0,1.06fr) minmax(360px,.94fr);gap:42px;align-items:center}
+    .a5-run figure{overflow:hidden;margin:0;border:1px solid var(--a5-line);border-radius:var(--a5-radius);background:#fff;box-shadow:var(--a5-shadow)}
+    .a5-run img{display:block;width:100%;height:auto}
+    .a5-run-copy h2{margin:0;font-size:clamp(29px,3.2vw,42px);line-height:1.16}
+    .a5-run-copy>p{margin:14px 0 0;color:var(--a5-muted);font-size:15px;line-height:1.7}
+    .a5-run-steps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+    .a5-run-steps article{padding:16px;border-radius:12px;background:#f3f7fc}
+    .a5-run-steps b{display:block;font-size:13px}
+    .a5-run-steps span{display:block;margin-top:6px;color:var(--a5-muted);font-size:11.5px;line-height:1.5}
+
+    .a5-close{display:grid;grid-template-columns:1.25fr .75fr;gap:28px;align-items:start}
+    .a5-close h2{max-width:13em;margin:0;font-size:clamp(30px,3.4vw,44px);line-height:1.14}
+    .a5-close p{max-width:45em;margin:15px 0 0;color:var(--a5-muted);font-size:14px;line-height:1.7}
+    .a5-close aside{padding:23px;border:1px solid var(--a5-line);border-radius:var(--a5-radius);background:#fff}
+    .a5-close aside b{display:block;font-size:14px}
+    .a5-close aside span{display:block;margin-top:9px;color:var(--a5-muted);font-size:12.5px;line-height:1.65}
+
+    :focus-visible{outline:3px solid rgba(36,88,166,.35);outline-offset:3px}
+    @media(max-width:1080px){
+      .a5-hero-grid,.a5-run,.a5-close{grid-template-columns:1fr}
+      .a5-columns{grid-template-columns:1fr 1fr}
+      .a5-column:not(:last-child)::after{display:none}
+      .a5-context-grid{grid-template-columns:1fr 1fr}
+      .a5-role-guide{grid-template-columns:230px minmax(0,1fr)}
+    }
+    @media(max-width:760px){
+      html{scroll-behavior:auto}
+      .a5-hero{padding:40px 0}
+      .a5-hero-grid{grid-template-columns:1fr;gap:30px}
+      .a5-hero h1{font-size:38px;line-height:1.08}
+      .a5-hero p{font-size:15px}
+      .a5-hero figcaption{display:block}
+      .a5-hero figcaption span{display:block}
+      .a5-hero figcaption span+span{margin-top:5px}
+      .a5-section{padding:54px 0}
+      .a5-boundary,.a5-statuses,.a5-role-strip,.a5-columns,.a5-context-grid,.a5-run-steps,.a5-close{grid-template-columns:1fr}
+      .a5-boundary{padding:17px}
+      .a5-system{padding:16px}
+      .a5-context-head{display:block}
+      .a5-context-head span{display:block;margin-top:8px}
+      .a5-governance{grid-template-columns:1fr}
+      .a5-governance i{padding:7px 0;transform:rotate(90deg)}
+      .a5-role-guide{grid-template-columns:1fr}
+      .a5-role-tabs{position:static;display:flex;overflow-x:auto;padding-bottom:5px;scroll-snap-type:x mandatory}
+      .a5-role-tab{min-width:190px;scroll-snap-align:start}
+      .a5-role-panel{min-height:0;padding:21px}
+      .a5-role-panel h3{font-size:25px}
+      .a5-guide-grid{grid-template-columns:1fr}
+    }
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      .a5-role-tab{transition:none}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <nav class="nav">
+    <div class="shell navin">
+      <a class="brand" href="index.html">
+        <span class="brandmark"><img src="guangsu-logo.svg" alt=""></span>
+        <span>光溯<small>故障诊断产品</small></span>
+      </a>
+      <div class="links">
+        <a href="index.html">产品概览</a>
+        <a aria-current="page" href="architecture-v5.html">架构设计</a>
+        <a href="case-study.html">诊断案例</a>
+        <a href="evidence.html">评测与治理</a>
+        <a class="demo" href="https://app.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="a5-hero">
+    <div class="shell a5-hero-grid">
+      <div>
+        <h1>把专家经验组装成可治理 Agent</h1>
+        <p>一套架构，同时解释业务配置、运行时控制、企业连接与质量闭环。</p>
+        <div class="a5-actions">
+          <a class="btn primary" href="#architecture">查看核心架构</a>
+          <a class="btn" href="#role-guide">按岗位讲解</a>
+        </div>
+      </div>
+      <figure>
+        <img src="assets/hero-cross-layer.png" alt="光溯跨层诊断工作台">
+        <figcaption><span>业务问题进入系统后，沿技术链路逐层取证</span><span>匿名模拟数据</span></figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="a5-section">
+      <div class="shell">
+        <div class="a5-boundary">
+          <div class="a5-boundary-intro">
+            <span class="a5-kicker">先交代事实边界</span>
+            <h2>这是产品架构升级，不是后端完成度包装</h2>
+            <p>当前 Demo 用于验证配置方式、诊断路径与用户交互。Harness、Skill、MCP、上下文和评测治理，是在项目复盘基础上形成的产品化升级设计。</p>
+          </div>
+          <div class="a5-statuses" aria-label="能力实现状态说明">
+            <article class="a5-status done"><b>已实现</b><span>可绘制链路、节点配置、诊断交互和结果展示</span></article>
+            <article class="a5-status demo"><b>前端模拟</b><span>运行状态、节点取证、Trace 和证据卡片</span></article>
+            <article class="a5-status design"><b>架构设计</b><span>场景资产、Skill Registry、MCP Runtime 和上下文投影</span></article>
+            <article class="a5-status future"><b>演进规划</b><span>生产接入、版本治理、自动评测与回归门禁</span></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="a5-section alt" id="architecture">
+      <div class="shell">
+        <div class="a5-heading">
+          <h2>谁配置什么，系统如何在运行时组装</h2>
+          <p>主图从维护责任开始，连接场景资产、Agent Harness、MCP 工具、运行上下文和质量治理。</p>
+        </div>
+        <div class="a5-system" aria-label="光溯场景资产、Skill、MCP 与上下文协同架构">
+          <div class="a5-role-strip">
+            <article class="a5-role business"><b>业务 / 测试 Owner</b><span>维护场景、用户现象、入口字段和业务规则</span></article>
+            <article class="a5-role technical"><b>技术 / 应用 Owner</b><span>维护拓扑、数据来源、节点检索和字段接力</span></article>
+            <article class="a5-role platform"><b>AI 产品 / 平台 Owner</b><span>治理 Workflow、Skills、MCP 策略、评测和发布</span></article>
+          </div>
+
+          <div class="a5-columns">
+            <section class="a5-column assets">
+              <h3>场景资产工作台</h3>
+              <p>把专家经验转为可维护的配置资产</p>
+              <div class="a5-stack">
+                <article class="a5-unit"><b>Scene Package</b><span>场景定义、动态字段、必填条件和敏感级别</span></article>
+                <article class="a5-unit"><b>Topology</b><span>应用节点、上下游关系、负责人和版本</span></article>
+                <article class="a5-unit"><b>Node Query Recipe</b><span>数据源、检索键组合和可提取的新标识</span></article>
+                <article class="a5-unit"><b>Correlation Plan</b><span>Trace 中断后的替代键、下一跳映射和失败策略</span></article>
+              </div>
+            </section>
+
+            <section class="a5-column runtime">
+              <h3>Workflow / Harness</h3>
+              <p>把配置组装成可控、可回放的诊断任务</p>
+              <div class="a5-stack">
+                <article class="a5-unit"><b>确定性主流程</b><span>场景确认、证据采集、条件分支和报告门禁</span></article>
+                <article class="a5-unit"><b>Skill Registry</b><span>请求理解、逐跳关联、RPC 诊断和报告生成</span></article>
+                <article class="a5-unit"><b>Context Projector</b><span>只给当前 Skill 必要字段、证据摘要和安全引用</span></article>
+                <article class="a5-unit"><b>调度边界</b><span>Skill 决定为何调用，Runtime 负责权限和执行</span></article>
+              </div>
+            </section>
+
+            <section class="a5-column tools">
+              <h3>MCP Tool Runtime</h3>
+              <p>标准化连接企业系统并约束访问边界</p>
+              <div class="a5-stack">
+                <article class="a5-unit"><b>Tool Gateway</b><span>工具发现、Schema 校验、鉴权、超时和降级</span></article>
+                <article class="a5-unit"><b>只读诊断工具</b><span>日志查询、知识检索、服务状态和网络探针</span></article>
+                <article class="a5-unit"><b>企业数据系统</b><span>日志平台、CMDB、知识库、监控和配置中心</span></article>
+                <article class="a5-unit"><b>安全边界</b><span>Skill 不保存凭据，敏感标识不进入明文上下文</span></article>
+              </div>
+            </section>
+
+            <section class="a5-column output">
+              <h3>证据化结果</h3>
+              <p>把模型判断转成可复核的诊断产物</p>
+              <div class="a5-stack">
+                <article class="a5-unit"><b>AI 决策卡</b><span>候选原因、关键证据和待核动作</span></article>
+                <article class="a5-unit"><b>人工复核</b><span>证据不足或关联不唯一时保留候选</span></article>
+                <article class="a5-unit"><b>Diagnostic Trace</b><span>记录调用、派生字段、跳过原因和证据引用</span></article>
+                <article class="a5-unit"><b>反馈回流</b><span>专家复核后进入配置、知识和能力迭代</span></article>
+              </div>
+            </section>
+          </div>
+
+          <section class="a5-context">
+            <div class="a5-context-head">
+              <b>Context, State & Evidence</b>
+              <span>上下文不是不断增长的聊天记录，而是按任务职责拆分的运行状态。</span>
+            </div>
+            <div class="a5-context-grid">
+              <article><b>Run Context</b><span>身份、权限、环境、版本和预算</span></article>
+              <article><b>Working State</b><span>场景、动态字段、当前节点和路由</span></article>
+              <article><b>Correlation Ledger</b><span>标识来源、转换、证据和置信度</span></article>
+              <article><b>Evidence / Artifact</b><span>日志原文、工具输出和证据引用</span></article>
+              <article><b>Checkpoint / Trace</b><span>暂停恢复、审计、回放和失败归因</span></article>
+            </div>
+          </section>
+
+          <div class="a5-governance">
+            <article><b>发布前验证</b><span>正常命中、缺字段、Trace 中断、多命中和权限异常共同签核</span></article>
+            <i>→</i>
+            <article><b>评测与失败归因</b><span>区分场景配置、关联计划、Skill、MCP、上下文和 Workflow 错误</span></article>
+            <i>→</i>
+            <article><b>版本化反馈</b><span>修复后重新回放，支持复测、比较和回滚</span></article>
+          </div>
+          <p class="a5-system-note">读图方法：上方是配置责任，中间是一次诊断的组装与执行，深色横层管理上下文和证据，底部负责持续治理。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="a5-section" id="role-guide">
+      <div class="shell">
+        <div class="a5-heading">
+          <span class="a5-kicker">面试讲解模式</span>
+          <h2>同一套架构，针对不同岗位强调不同判断</h2>
+          <p>切换目标岗位，获得可直接使用的开场讲法、重点证据和追问准备。</p>
+        </div>
+        <div class="a5-role-guide">
+          <div class="a5-role-tabs" role="tablist" aria-label="选择目标岗位">
+            <button class="a5-role-tab" type="button" role="tab" aria-selected="true" aria-controls="role-application" id="tab-application" data-panel="role-application">应用型 Agent 产品</button>
+            <button class="a5-role-tab" type="button" role="tab" aria-selected="false" aria-controls="role-platform" id="tab-platform" data-panel="role-platform">Agent 平台产品</button>
+            <button class="a5-role-tab" type="button" role="tab" aria-selected="false" aria-controls="role-aiops" id="tab-aiops" data-panel="role-aiops">AIOps / 复杂业务平台</button>
+            <button class="a5-role-tab" type="button" role="tab" aria-selected="false" aria-controls="role-technical" id="tab-technical" data-panel="role-technical">技术与架构面试官</button>
+          </div>
+
+          <article class="a5-role-panel" role="tabpanel" id="role-application" aria-labelledby="tab-application">
+            <h3>重点讲清业务知识如何进入系统，并稳定完成任务</h3>
+            <p class="focus">建议用时：90 秒。关键词：场景抽象、用户交互、可解释结果。</p>
+            <div class="a5-script">
+              <b>讲解稿</b>
+              <p>这套架构首先解决的不是模型选型，而是不同业务场景需要不同输入字段和排查路径的问题。我把场景、入口字段、节点检索方式和跨节点关联规则抽象成可维护资产。运行时由固定 Workflow 保证场景确认、证据采集和报告门禁，Skill 只处理需要专业判断的步骤。最终输出不只是一个答案，而是候选原因、证据引用和待核动作。当前 Demo 重点验证了前端配置方式和用户诊断流程，平台化 Runtime 是后续产品升级设计。</p>
+            </div>
+            <div class="a5-guide-grid">
+              <section class="a5-guide-block"><h4>优先展示</h4><ul><li>场景资产工作台和动态入口字段</li><li>从自然语言问题到诊断任务的转换</li><li>证据卡、人工复核和下一步动作</li></ul></section>
+              <section class="a5-guide-block"><h4>常见追问</h4><ul><li>业务人员是否需要填写 JSON</li><li>新增场景如何减少开发依赖</li><li>结果不确定时如何表达</li></ul></section>
+            </div>
+          </article>
+
+          <article class="a5-role-panel" role="tabpanel" id="role-platform" aria-labelledby="tab-platform" hidden>
+            <h3>重点讲清确定性骨架与动态能力之间的运行时边界</h3>
+            <p class="focus">建议用时：120 秒。关键词：Harness、上下文投影、工具治理、Trace。</p>
+            <div class="a5-script">
+              <b>讲解稿</b>
+              <p>我把平台运行机制拆成四层。Workflow 保留不可跳过的确定性步骤，Skill Registry 管理可复用的诊断方法，Context Projector 只向当前 Skill 投影最小必要上下文，MCP Runtime 负责工具发现、参数校验、权限和执行。Skill 决定为什么调用工具，MCP 决定如何安全调用。每一步的场景版本、能力版本、派生字段、证据引用和跳过原因进入 Diagnostic Trace，后续评测可以把失败归因到配置、Skill、工具、上下文或流程，而不是只判断最终答案对错。</p>
+            </div>
+            <div class="a5-guide-grid">
+              <section class="a5-guide-block"><h4>优先展示</h4><ul><li>Workflow、Skill 与 MCP 的职责边界</li><li>Run Context 与 Working State 的拆分</li><li>Trace、评测、版本和回放闭环</li></ul></section>
+              <section class="a5-guide-block"><h4>常见追问</h4><ul><li>为什么不用一个大 Prompt</li><li>上下文如何避免无限增长</li><li>Skill 与 MCP 为什么不能合并</li></ul></section>
+            </div>
+          </article>
+
+          <article class="a5-role-panel" role="tabpanel" id="role-aiops" aria-labelledby="tab-aiops" hidden>
+            <h3>重点讲清非完整 Trace 条件下的跨系统取证与关联</h3>
+            <p class="focus">建议用时：90 秒。关键词：动态字段、逐跳关联、证据链、迁移能力。</p>
+            <div class="a5-script">
+              <b>讲解稿</b>
+              <p>真实故障并不总有完整 Trace ID，所以我没有把诊断能力建立在单一链路标识上。每个节点维护可接受的检索键、可提取的新标识和下一跳映射，运行时通过 Correlation Ledger 记录手机号、柜员号、请求号、局部 Trace 等标识的来源和转换证据。关联中断或多命中时系统不会强行串链，而是保留候选并请求补充信息。这套抽象可以迁移到客服、风控、交付治理和其他需要跨系统取证的复杂场景。</p>
+            </div>
+            <div class="a5-guide-grid">
+              <section class="a5-guide-block"><h4>优先展示</h4><ul><li>Node Query Recipe 与 Correlation Plan</li><li>Trace 中断、多命中和缺字段策略</li><li>证据引用与人工复核边界</li></ul></section>
+              <section class="a5-guide-block"><h4>常见追问</h4><ul><li>没有全链路 Trace 怎么关联</li><li>字段类型和数量变化怎么处理</li><li>如何控制误关联和误判</li></ul></section>
+            </div>
+          </article>
+
+          <article class="a5-role-panel" role="tabpanel" id="role-technical" aria-labelledby="tab-technical" hidden>
+            <h3>重点讲清你负责产品机制设计，不把架构方案包装成生产实现</h3>
+            <p class="focus">建议用时：75 秒。关键词：职责边界、接口合同、安全、工程可行性。</p>
+            <div class="a5-script">
+              <b>讲解稿</b>
+              <p>我的工作重点是把专家排障过程抽象成可实现的对象、状态和协作合同。场景资产定义输入与链路，Workflow 定义不可跳过的执行门禁，Skill 定义诊断方法，MCP Runtime 定义受控工具访问，Trace 定义可审计的运行记录。我不会把这些内容表述为已经完成的生产后端。当前可验证的是交互原型、配置模型和诊断路径，后续落地需要与研发共同细化存储、调度、权限、可观测性和性能方案。</p>
+            </div>
+            <div class="a5-guide-grid">
+              <section class="a5-guide-block"><h4>优先展示</h4><ul><li>对象边界和运行时职责</li><li>凭据、敏感字段与只读工具策略</li><li>从 Demo 到生产化的工程拆分</li></ul></section>
+              <section class="a5-guide-block"><h4>避免误区</h4><ul><li>不声称独立完成全部后端</li><li>不把前端模拟称为生产接入</li><li>不回避性能、权限和稳定性问题</li></ul></section>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="a5-section alt">
+      <div class="shell a5-run">
+        <figure><img src="assets/execution-trace.png" alt="光溯诊断执行 Trace"></figure>
+        <div class="a5-run-copy">
+          <h2>用一条诊断路径证明架构不是概念堆叠</h2>
+          <p>案例从模糊问题开始，经过场景确认、逐跳取证、条件能力调度和报告门禁，最终保留证据与判断边界。</p>
+          <div class="a5-run-steps">
+            <article><b>场景确认</b><span>把自然语言问题转换成输入合同</span></article>
+            <article><b>逐跳关联</b><span>从入口字段派生下一节点检索标识</span></article>
+            <article><b>能力调度</b><span>证据满足条件后触发专项 Skill</span></article>
+            <article><b>报告门禁</b><span>证据不足时保留候选而非强结论</span></article>
+          </div>
+          <div class="a5-actions"><a class="btn primary" href="case-study.html">查看完整案例</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="a5-section">
+      <div class="shell a5-close">
+        <div>
+          <h2>我展示的不是组件数量，而是产品架构判断</h2>
+          <p>面对应用 Agent 岗位，我强调场景抽象和用户闭环；面对平台岗位，我强调运行时边界、上下文和治理；面对复杂业务岗位，我强调跨系统关联与证据化决策。</p>
+          <div class="a5-actions">
+            <a class="btn primary" href="evidence.html">查看评测治理</a>
+            <a class="btn" href="https://app.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a>
+          </div>
+        </div>
+        <aside>
+          <b>公开材料边界</b>
+          <span>公开 Demo 使用匿名模拟数据。交互与诊断流程用于验证产品机制，Harness、Skill、MCP、上下文和完整评测治理属于产品架构升级与生产化演进设计。</span>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell footin">
+      <div class="foot-links">
+        <span class="copyright">Wang Yuxuan</span>
+        <a href="resume/" target="_blank" rel="noreferrer">Resume</a>
+        <a href="mailto:wangyx9621@163.com">Email</a>
+        <a href="index.html">返回产品概览</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll('.a5-role-tab'));
+    const panels = Array.from(document.querySelectorAll('.a5-role-panel'));
+
+    function activateRole(tab) {
+      tabs.forEach((item) => item.setAttribute('aria-selected', String(item === tab)));
+      panels.forEach((panel) => {
+        panel.hidden = panel.id !== tab.dataset.panel;
+      });
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activateRole(tab));
+      tab.addEventListener('keydown', (event) => {
+        if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(event.key)) return;
+        event.preventDefault();
+        const step = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : -1;
+        const next = tabs[(index + step + tabs.length) % tabs.length];
+        next.focus();
+        activateRole(next);
+      });
+    });
+  </script>
+</body>
+</html>

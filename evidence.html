@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="光溯如何按业务场景深诊断、领域 Agent 问答和日志检索三类路径分别评测，并通过工具调用记录、证据链路、基准契约与失败样本回流持续治理诊断质量。">
+  <title>光溯评测与治理 · 按路径分别评测</title>
+  <link rel="icon" type="image/svg+xml" href="guangsu-logo.svg">
+  <link rel="stylesheet" href="guangsu-site.css">
+  <style>
+    .section-actions{margin-top:18px}
+    .quality-thesis{display:grid;grid-template-columns:.84fr 1.16fr;overflow:hidden;border:1px solid var(--line2);border-radius:18px;background:var(--surface);box-shadow:var(--shadow)}.quality-thesis>article{padding:28px;background:var(--ink);color:#fff}.quality-thesis .eyebrow{margin:0 0 12px;color:#9cb8ff;font-size:11px;font-weight:760}.quality-thesis h3{max-width:16em;margin:0 0 12px;font-family:"Songti SC","STSong","SimSun",serif;font-size:25px;font-weight:600;line-height:1.34}.quality-thesis>article p:last-child{max-width:34em;margin:0;color:#bac6d9}.quality-criteria{display:grid;grid-template-columns:1fr 1fr}.quality-criteria article{padding:21px}.quality-criteria article:nth-child(even){border-left:1px solid var(--line)}.quality-criteria article:nth-child(n+3){border-top:1px solid var(--line)}.quality-criteria span{color:var(--blue);font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}.quality-criteria b{display:block;margin:10px 0 5px;font-size:14px}.quality-criteria p{margin:0;color:var(--muted)}
+    .path-map{display:grid;gap:12px}.path-lane{position:relative;display:grid;grid-template-columns:205px 1fr 285px;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:var(--surface)}.path-lane.primary{border-color:#aebfe9;box-shadow:0 14px 34px rgba(45,83,130,.09)}.lane-intro{padding:20px;border-right:1px solid var(--line);background:#f8fafc}.primary .lane-intro{background:linear-gradient(145deg,#e5eefc,#f3f7fd)}.lane-number{display:block;margin-bottom:18px;color:var(--blue);font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}.lane-intro h3{margin:0 0 6px;font-size:16px}.lane-intro p{margin:0;color:var(--muted)}.lane-flow{display:flex;flex-wrap:wrap;align-content:center;align-items:center;gap:7px;padding:18px}.lane-flow span{display:inline-flex;min-height:34px;align-items:center;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:10.5px;font-weight:650}.lane-flow i{color:var(--blue);font-style:normal}.lane-metrics{padding:18px;border-left:1px solid var(--line);background:rgba(237,245,253,.48)}.lane-metrics b{display:block;margin-bottom:8px;color:var(--blue2);font-size:11px}.metric-tags{display:flex;flex-wrap:wrap;gap:6px}.metric-tags span{padding:4px 7px;border:1px solid #d9d4f3;border-radius:6px;background:#f5f2fb;color:#514978;font-size:9.5px;font-weight:650}.route-split{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%}.route-split div{padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff}.route-split b{display:block;margin-bottom:3px;font-size:11px}.route-split small{color:var(--muted);font-size:10px;line-height:1.45}.path-rule{margin-top:14px;padding:14px 16px;border-left:4px solid var(--blue);background:var(--soft);color:var(--ink);font-size:12px}.path-rule b{color:var(--blue2)}
+    .layer-matrix{display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;border:1px solid var(--line2);border-radius:16px;background:var(--surface)}.layer-matrix article{padding:22px}.layer-matrix article+article{border-left:1px solid var(--line)}.layer-matrix span{color:var(--blue);font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}.layer-matrix b{display:block;margin:22px 0 6px;font-size:14px}.layer-matrix p{margin:0;color:var(--muted)}.layer-coverage{display:grid;grid-template-columns:160px repeat(3,1fr);margin-top:12px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:10.5px}.layer-coverage>div{padding:11px 12px;border-left:1px solid var(--line);border-top:1px solid var(--line)}.layer-coverage>div:nth-child(-n+4){border-top:0}.layer-coverage>div:nth-child(4n+1){border-left:0}.layer-coverage .matrix-head{background:#edf3fb;color:var(--blue2);font-weight:720}.layer-coverage .strong{background:#eaf3ef;color:#265f52;font-weight:720}.layer-coverage .light{color:var(--muted)}
+    .contract-head{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;margin-bottom:14px}.contract-head p{max-width:54em;margin:0;color:var(--muted)}.contract-badge{padding:8px 11px;border:1px solid var(--line2);border-radius:8px;background:var(--soft);color:var(--blue2);font-size:11px;font-weight:720;white-space:nowrap}.contract-proof{display:grid;grid-template-columns:repeat(5,1fr);overflow:hidden;border:1px solid var(--line2);border-radius:15px;background:var(--surface)}.contract-proof article{min-height:128px;padding:17px}.contract-proof article+article{border-left:1px solid var(--line)}.contract-proof article:nth-child(6){border-left:0}.contract-proof article:nth-child(n+6){border-top:1px solid var(--line)}.contract-proof span{color:var(--blue);font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace}.contract-proof b{display:block;margin:18px 0 5px;font-size:12px}.contract-proof p{margin:0;color:var(--muted);font-size:10.5px!important}.contract-boundary{margin-top:12px;padding:13px 15px;border-left:3px solid var(--amber);background:#fff8e8;color:#6d552f;font-size:11px}
+    .trace-types{display:grid;grid-template-columns:1.15fr .85fr .85fr;gap:12px}.trace-type{padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}.trace-type.primary{border-color:#b8cae8;background:linear-gradient(145deg,#f8fbff,#eef5fd)}.trace-type .trace-label{color:var(--blue);font:700 10px ui-monospace,SFMono-Regular,Menlo,monospace}.trace-type h3{margin:12px 0 6px;font-size:15px}.trace-type>p{min-height:40px;margin:0;color:var(--muted)}.trace-steps{display:grid;gap:6px;margin-top:16px}.trace-steps span{display:flex;align-items:center;gap:8px;padding:7px 8px;border-top:1px solid var(--line);font-size:10.5px}.trace-steps i{width:18px;height:18px;display:grid;flex:none;place-items:center;border-radius:50%;background:var(--blue);color:#fff;font:700 8px ui-monospace,SFMono-Regular,Menlo,monospace;font-style:normal}
+    .eval-record{display:grid;grid-template-columns:1fr 1.2fr 1fr;overflow:hidden;border:1px solid var(--line2);border-radius:15px;background:var(--surface)}.eval-record article{position:relative;padding:22px}.eval-record article+article{border-left:1px solid var(--line)}.eval-record span{color:var(--blue);font:700 9px ui-monospace,SFMono-Regular,Menlo,monospace}.eval-record b{display:block;margin:18px 0 5px;font-size:13px}.eval-record p{margin:0;color:var(--muted)}.record-parts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.record-parts small{padding:5px 7px;border:1px solid var(--line);border-radius:6px;background:var(--soft);color:var(--blue2);font-size:9.5px}.feedback-bridge{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;margin-top:12px;padding:15px 16px;border-left:4px solid var(--blue);background:var(--soft)}.feedback-bridge b{display:block;margin-bottom:4px;font-size:12px}.feedback-bridge p{margin:0;color:var(--muted)}.feedback-bridge span{color:var(--blue2);font-size:11px;font-weight:720;white-space:nowrap}
+    @media(max-width:1000px){.path-lane{grid-template-columns:190px 1fr}.lane-metrics{grid-column:1/-1;border-left:0;border-top:1px solid var(--line)}.contract-proof{grid-template-columns:repeat(2,1fr)}.contract-proof article+article{border-left:0}.contract-proof article:nth-child(even){border-left:1px solid var(--line)}.contract-proof article:nth-child(n+3){border-top:1px solid var(--line)}.contract-proof article:nth-child(6){border-left:1px solid var(--line)}.contract-proof article:nth-child(n+6){border-top:1px solid var(--line)}.trace-types{grid-template-columns:1fr 1fr}.trace-type.primary{grid-column:1/-1}}
+    @media(max-width:900px){.quality-thesis{grid-template-columns:1fr}.layer-matrix{grid-template-columns:1fr 1fr}.layer-matrix article:nth-child(3){border-left:0}.layer-matrix article:nth-child(n+3){border-top:1px solid var(--line)}.layer-coverage{grid-template-columns:130px repeat(3,minmax(150px,1fr));overflow-x:auto}.eval-record{grid-template-columns:1fr}.eval-record article+article{border-left:0;border-top:1px solid var(--line)}}
+    @media(max-width:680px){.quality-criteria,.route-split,.layer-matrix,.trace-types{grid-template-columns:1fr}.quality-criteria article:nth-child(even){border-left:0}.quality-criteria article:nth-child(n+2){border-top:1px solid var(--line)}.path-lane{grid-template-columns:1fr}.lane-intro{border-right:0;border-bottom:1px solid var(--line)}.lane-flow i{transform:rotate(90deg)}.layer-matrix article+article,.layer-matrix article:nth-child(3){border-left:0}.layer-matrix article:nth-child(n+2){border-top:1px solid var(--line)}.contract-head{grid-template-columns:1fr;align-items:start}.contract-badge{width:max-content}.contract-proof{grid-template-columns:1fr}.contract-proof article:nth-child(even),.contract-proof article:nth-child(6){border-left:0}.contract-proof article:nth-child(n+2){border-top:1px solid var(--line)}.trace-type.primary{grid-column:auto}.feedback-bridge{grid-template-columns:1fr}.feedback-bridge span{white-space:normal}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <nav class="nav">
+    <div class="shell navin">
+      <a class="brand" href="index.html"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z"/><path d="m7 16.5-4.74-2.85M7 16.5l5-3M7 16.5v5.17"/><path d="M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z"/><path d="m17 16.5-5-3m5 3 4.74-2.85M17 16.5v5.17"/><path d="M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z"/><path d="M12 8 7.26 5.15M12 8l4.74-2.85M12 13.5V8"/></svg></span><span>光溯<small>故障诊断产品</small></span></a>
+      <div class="links"><a href="index.html">产品概览</a><a href="architecture.html">架构设计</a><a href="case-study.html">诊断案例</a><a aria-current="page" href="evidence.html">评测与治理</a><a class="demo" href="https://app.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a></div>
+    </div>
+  </nav>
+
+  <header class="pagehead evidence-head">
+    <div class="shell evidence-intro">
+      <h1><span class="title-label">评测与治理 ·</span><span class="title-main">不同诊断路径，如何被分别验证</span></h1>
+      <p class="subhead">统一质量底座 · 分路径指标 · 可回放迭代</p>
+      <p class="lead">光溯不是让所有问题都走同一条 Agent Workflow。业务场景深诊断、领域 Agent 问答和日志检索使用不同路径，也必须用不同指标判断质量。</p>
+      <div class="principles"><span>按路径分别评测</span><span>基准契约</span><span>工具调用与证据链路</span><span>评测判定结果</span><span>失败样本回流</span></div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section">
+      <div class="shell">
+        <div class="quality-thesis">
+          <article><p class="eyebrow">质量判断</p><h3>先区分评测对象，再验证执行、证据、边界与回归</h3><p>领域问答、日志检索和业务深诊断具有不同目标。按路径分别评测让每个失败都能指向明确的能力层与修复责任。</p></article>
+          <div class="quality-criteria">
+            <article><span>01 / ROUTE</span><b>路径选择</b><p>验证领域路由、深诊断升级与任务创建是否符合入口边界。</p></article>
+            <article><span>02 / EVIDENCE</span><b>证据充分性</b><p>验证回答或结论能否指回知识引用、日志片段、工具结果与业务链路。</p></article>
+            <article><span>03 / BOUNDARY</span><b>结论边界</b><p>证据不足时保留候选原因、正确拒答或转交人工，避免强行归类。</p></article>
+            <article><span>04 / REGRESSION</span><b>版本回归</b><p>知识、模型、工具或流程变更后，固定样本按各自路径稳定回放。</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="shell">
+        <div class="head"><div class="label">路径与评测</div><div><h2>三类入口，四种实际执行方式</h2><p>业务场景深诊断是端到端趋势跟踪的主对象；领域 Agent 与日志检索保留自己的目标和质量口径。</p></div></div>
+        <div class="path-map">
+          <article class="path-lane primary">
+            <div class="lane-intro"><span class="lane-number">PATH 01 · PRIMARY</span><h3>业务场景深诊断</h3><p>链路最长、证据源最多，形成完整诊断任务与报告。</p></div>
+            <div class="lane-flow"><span>请求理解</span><i>→</i><span>场景解析与确认</span><i>→</i><span>读取业务链路</span><i>→</i><span>日志 + RAG + 条件诊断</span><i>→</i><span>证据约束报告</span></div>
+            <div class="lane-metrics"><b>主评测指标</b><div class="metric-tags"><span>场景解析命中</span><span>根因命中</span><span>关键证据门禁</span><span>工具路径正确</span><span>诊断耗时</span></div></div>
+          </article>
+          <article class="path-lane">
+            <div class="lane-intro"><span class="lane-number">PATH 02 · DOMAIN</span><h3>领域 Agent 问答</h3><p>应用、系统、网络问题进入受控领域智能体，结合 RAG 与按需工具补充上下文。</p></div>
+            <div class="lane-flow"><span>意图路由</span><i>→</i><span>领域 Agent</span><i>→</i><span>RAG / 按需工具 / 追问</span><i>→</i><span>回答 / 拒答 / 升级</span></div>
+            <div class="lane-metrics"><b>独立评测指标</b><div class="metric-tags"><span>领域路由正确</span><span>RAG 检索与忠实度</span><span>工具与参数正确</span><span>工具证据支撑</span><span>上下文保持</span><span>正确拒答或升级</span></div></div>
+          </article>
+          <article class="path-lane">
+            <div class="lane-intro"><span class="lane-number">PATH 03 · RETRIEVAL</span><h3>日志检索</h3><p>技术用户已提供结构化条件，跳过前置自然语言理解。</p></div>
+            <div class="lane-flow"><div class="route-split"><div><b>按业务场景</b><small>读取已维护链路 → 多节点日志 → 证据选择</small></div><div><b>按应用 / 节点</b><small>直接查询日志 → 异常片段 → 证据选择</small></div></div><i>→</i><span>可选生成诊断任务</span></div>
+            <div class="lane-metrics"><b>独立评测指标</b><div class="metric-tags"><span>检索条件有效</span><span>链路或节点覆盖</span><span>日志召回有效</span><span>证据选择质量</span><span>任务生成成功</span></div></div>
+          </article>
+        </div>
+        <div class="path-rule"><b>评测规则：</b>不同路径分别评测、分别归因，不混算一个“全链路准确率”；业务场景深诊断默认承担端到端回归与版本趋势。</div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="head"><div class="label">统一质量底座</div><div><h2>路径不同，但证据、工具和版本仍需共同治理</h2><p>四层模型是横向质量框架，不代表每条路径都必须走完四层；每条路径按自身风险选择评测深度。</p></div></div>
+        <div class="layer-matrix">
+          <article><span>LAYER 01</span><b>知识与回答层</b><p>检查候选命中、上下文精度、回答忠实度、引用有效性与知识来源。</p></article>
+          <article><span>LAYER 02</span><b>工具与数据层</b><p>检查参数、执行状态、结果回传，以及链路、节点和日志数据是否真实可用。</p></article>
+          <article><span>LAYER 03</span><b>路径与结论层</b><p>检查跨层路由、证据合并、条件分支、拒答升级与结论门禁。</p></article>
+          <article><span>LAYER 04</span><b>发布与回归层</b><p>检查匿名边界、版本冻结、Runner 可回放性和历史样本退化。</p></article>
+        </div>
+        <div class="layer-coverage" aria-label="路径与评测层级对应关系">
+          <div class="matrix-head">评测路径</div><div class="matrix-head">知识 / 工具</div><div class="matrix-head">路径 / 结论</div><div class="matrix-head">发布 / 回归</div>
+          <div>业务场景深诊断</div><div class="strong">完整覆盖</div><div class="strong">端到端主对象</div><div class="strong">固定样本趋势</div>
+          <div>领域 Agent 问答</div><div class="strong">路由、检索、工具与回答</div><div class="light">追问、拒答与升级边界</div><div class="light">领域样本回归</div>
+          <div>日志检索</div><div class="strong">条件、链路、日志</div><div class="light">证据选择与任务生成</div><div class="light">检索样本回归</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="shell">
+        <div class="head"><div class="label">代表案例契约</div><div><h2>把业务深诊断的产品判断编码成 10 项门禁</h2><p>“RPC 超时不能直接写成网络根因”不是文案偏好，而是可自动执行、可失败、可回归的产品边界。</p></div></div>
+        <div class="contract-head"><p>以下契约用于公开主案例的业务场景深诊断路径。</p><span class="contract-badge">业务场景深诊断 · 10 项</span></div>
+        <div class="contract-proof">
+          <article><span>01 / PATH</span><b>路径顺序</b><p>实际步骤与签核路径一致。</p></article>
+          <article><span>02 / EVIDENCE</span><b>必备证据</b><p>日志、服务和网络证据齐全。</p></article>
+          <article><span>03 / TOOL</span><b>服务工具</b><p>存在可审计的工具调用记录。</p></article>
+          <article><span>04 / TOOL</span><b>网络工具</b><p>探测调用与结果进入 Trace。</p></article>
+          <article><span>05 / ROUTE</span><b>跨层路由</b><p>网络触发，数据库保持跳过。</p></article>
+          <article><span>06 / REPORT</span><b>报告引用</b><p>结论覆盖必备证据。</p></article>
+          <article><span>07 / GUARDRAIL</span><b>禁止断言</b><p>不把 RPC 超时直接写成网络根因。</p></article>
+          <article><span>08 / RETRIEVAL</span><b>检索可用</b><p>RPC 排查知识真实可用。</p></article>
+          <article><span>09 / BOUNDARY</span><b>结论强度</b><p>根因限定在匿名 fixture。</p></article>
+          <article><span>10 / REGRESSION</span><b>接口回归</b><p>正例与失败门禁全部通过。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="head"><div class="label">分路径 Trace</div><div><h2>每条路径都可回放，但记录的检查点不同</h2><p>Trace 不只是保存模型输出，而是保留决定这条路径为何被选择、证据如何进入结果、哪些分支被跳过。</p></div></div>
+        <div class="trace-types">
+          <article class="trace-type primary"><span class="trace-label">BUSINESS DEEP</span><h3>完整诊断 Trace</h3><p>覆盖从模糊输入到证据约束报告的端到端路径。</p><div class="trace-steps"><span><i>01</i>请求理解与缺失字段</span><span><i>02</i>候选场景与用户确认</span><span><i>03</i>业务链路、工具参数与返回</span><span><i>04</i>条件诊断的触发与跳过原因</span><span><i>05</i>证据引用、结论门禁与人工复核</span></div></article>
+          <article class="trace-type"><span class="trace-label">DOMAIN AGENT</span><h3>领域 Agent Trace</h3><p>重点验证领域路由、知识引用、工具决策和多轮上下文。</p><div class="trace-steps"><span><i>01</i>领域路由结果</span><span><i>02</i>检索候选与引用</span><span><i>03</i>工具条件、参数与结果</span><span><i>04</i>追问、回答、拒答或升级</span></div></article>
+          <article class="trace-type"><span class="trace-label">LOG RETRIEVAL</span><h3>检索 Trace</h3><p>记录结构化条件如何转成可复核的日志证据。</p><div class="trace-steps"><span><i>01</i>场景或节点模式</span><span><i>02</i>链路读取或日志查询</span><span><i>03</i>异常聚类与时间线</span><span><i>04</i>证据选择与任务生成</span></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="shell">
+        <div class="head"><div class="label">评测记录结构</div><div><h2>基准、运行与评分分层记录</h2><p>这部分定义一次评测如何成立，适用于成功和失败样本；它记录质量，不直接负责修复问题。</p></div></div>
+        <div class="eval-record">
+          <article><span>01 / EXPECTED</span><b>基准契约</b><p>预先定义期望路径、必备证据、禁止断言和通过条件。</p><div class="record-parts"><small>期望路径</small><small>必备证据</small><small>禁止输出</small></div></article>
+          <article><span>02 / OBSERVED</span><b>实际运行记录</b><p>同时保存模型输出、工具调用记录和证据链路，避免只看最终答案。</p><div class="record-parts"><small>模型输出</small><small>工具调用记录</small><small>证据链路</small><small>版本信息</small></div></article>
+          <article><span>03 / JUDGED</span><b>评测判定结果</b><p>对照基准生成通过状态、差异项和失败断点，供趋势与回归使用。</p><div class="record-parts"><small>通过 / 失败</small><small>差异项</small><small>失败归因</small></div></article>
+        </div>
+        <div class="feedback-bridge"><div><b>评测记录与 Bad Case 的交界</b><p>所有运行都形成评测记录；只有失败、低置信或人工标记异常的记录，经复核后才成为 Bad Case 候选。</p></div><span>异常记录 → 进入下方修复闭环</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="head"><div class="label">Bad Case 修复</div><div><h2>异常记录如何推动修复与回归</h2><p>这部分只由失败、低置信或人工标记异常触发；统一标签帮助判断该修路由、RAG、链路库、日志采集、工具参数还是报告门禁。</p></div></div>
+        <div class="badcase-loop"><div><span>01</span><b>用户反馈 / 失败诊断</b><p>收集运行结果与人工复核</p></div><i>→</i><div><span>02</span><b>按路径归因</b><p>路由、知识、链路、日志、工具或报告</p></div><i>→</i><div><span>03</span><b>执行修复</b><p>补样本、知识、映射、工具或流程</p></div><i>→</i><div><span>04</span><b>冻结回归样本</b><p>固定输入、证据、禁区、路径和版本</p></div><i>→</i><div><span>05</span><b>版本门禁</b><p>分路径回放，阻止同类问题回归</p></div></div>
+        <div class="failure-taxonomy"><span>统一失败标签</span><b>领域路由错误</b><b>错误拒答 / 升级</b><b>场景解析错误</b><b>链路或节点缺失</b><b>日志召回不足</b><b>工具执行失败</b><b>知识缺失</b><b>结论越界</b></div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="shell">
+        <div class="head"><div class="label">知识治理</div><div><h2>三类路径共享一套可追溯的知识与证据资产</h2><p>路径拆分不等于数据割裂；业务拓扑、日志、领域知识和处理经验仍需统一对象、来源、责任和版本。</p></div></div>
+        <div class="knowledge-governance"><aside><strong>12</strong><span>个业务与技术团队</span><p>协调知识贡献、责任确认和更新边界。</p></aside><div class="knowledge-pipeline"><article><i>01</i><b>统一知识对象</b><p>业务场景、应用节点、接口、错误码、日志入口和处理经验。</p></article><article><i>02</i><b>补齐治理字段</b><p>来源、版本、责任域、适用环境、敏感级别和失效状态。</p></article><article><i>03</i><b>建立关系层</b><p>把场景、应用、接口、日志、工具和责任域连成上下文。</p></article><article><i>04</i><b>动态更新</b><p>变更经确认后发布，并触发受影响路径的样本回归。</p></article></div></div>
+        <div class="knowledge-principles"><article><b>知识命中 ≠ 根因确认</b><p>检索结果只提供排查方向，业务深诊断仍需运行证据。</p></article><article><b>检索失败 ≠ 知识缺失</b><p>召回问题、路由问题与知识缺口需要分开归因。</p></article><article><b>动态更新 ≠ 自动入库</b><p>来源、范围、责任和受影响路径确认后才能发布。</p></article></div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="shell">
+        <div class="head"><div class="label">我的工作与协同</div><div><h2>产品判断与跨团队知识建设共同支撑质量闭环</h2><p>作品集聚焦我负责的路径抽象、评测口径、质量门禁与治理设计。</p></div></div>
+        <div class="role-grid"><article><strong>我的工作</strong><p>主导课题方向与产品定义，搭建智能诊断工作流和整体架构，推动跨团队知识标准与评测体系建设。</p></article><article><strong>协同建设</strong><p>真实课题中的业务链路梳理、日志平台对接、知识资产整理和工程落地由团队共同建设。</p></article></div>
+        <div class="actions section-actions"><a class="btn primary" href="case-study.html">回看主案例</a><a class="btn" href="index.html">返回产品概览</a></div>
+      </div>
+    </section>
+
+    <section class="section alt reading-section">
+      <div class="shell"><div class="head"><div class="label">继续深读</div><div><h2>回看产品、主流程与诊断案例</h2><p>从产品定位进入主案例，或继续查看四域架构与条件 Skills。</p></div></div><div class="reading-grid reading-rail"><a href="index.html">回看产品定位<small>问题、核心能力与设计选择</small></a><a href="architecture.html">看主流程与条件 Skills<small>诊断引擎、三类路径与关键取舍</small></a><a href="case-study.html">跟一条登录失败诊断<small>从场景确认到证据约束报告</small></a></div></div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="shell footin"><div class="foot-links"><a href="index.html">产品概览</a><a href="architecture.html">架构设计</a><a href="case-study.html">诊断案例</a><a href="https://app.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a></div><span class="copyright">光溯评测与治理</span></div></footer>
+</body>
+</html>

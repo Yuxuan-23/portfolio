@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="光溯如何把复杂业务诊断抽象成可配置、可编排、可连接、可验证的企业 Agent 产品。">
+  <title>光溯 · 可配置 Agent 产品架构</title>
+  <link rel="icon" type="image/svg+xml" href="guangsu-logo.svg">
+  <link rel="stylesheet" href="guangsu-site.css">
+  <style>
+    :root{
+      --v3-blue:#2458a6;
+      --v3-blue-soft:#edf4ff;
+      --v3-cyan:#217f92;
+      --v3-ink:#17304d;
+      --v3-muted:#5d7086;
+      --v3-line:#d9e4ef;
+      --v3-surface:#f7faff;
+      --v3-radius:16px;
+    }
+    .v3-hero{padding:72px 0 52px;background:linear-gradient(180deg,#f5f9ff 0%,#fff 100%)}
+    .v3-hero-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(460px,1.08fr);gap:54px;align-items:center}
+    .v3-hero h1{max-width:9.5em;margin:0;color:var(--v3-ink);font-size:clamp(38px,4.8vw,64px);line-height:1.04;letter-spacing:-.045em}
+    .v3-hero .lead{max-width:31em;margin:22px 0 0;color:var(--v3-muted);font-size:17px;line-height:1.72}
+    .v3-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+    .v3-proof{overflow:hidden;border:1px solid rgba(36,88,166,.16);border-radius:var(--v3-radius);background:#eef5ff;box-shadow:0 28px 70px rgba(31,65,110,.13)}
+    .v3-proof img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+    .v3-proof figcaption{display:flex;justify-content:space-between;gap:16px;padding:12px 16px;border-top:1px solid var(--v3-line);color:var(--v3-muted);font-size:12px}
+
+    .v3-section{padding:78px 0}
+    .v3-section.alt{background:var(--v3-surface)}
+    .v3-heading{max-width:760px;margin-bottom:34px}
+    .v3-heading .label{display:inline-block;margin-bottom:11px;color:var(--v3-blue);font-size:13px;font-weight:700;letter-spacing:.04em}
+    .v3-heading h2{margin:0;color:var(--v3-ink);font-size:clamp(28px,3.1vw,42px);line-height:1.16;letter-spacing:-.03em}
+    .v3-heading p{max-width:47em;margin:14px 0 0;color:var(--v3-muted);font-size:15px;line-height:1.7}
+
+    .v3-bento{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+    .v3-decision{padding:28px;border:1px solid var(--v3-line);border-radius:var(--v3-radius);background:#fff}
+    .v3-decision.primary{grid-row:span 2;display:flex;min-height:420px;flex-direction:column;justify-content:space-between;background:linear-gradient(145deg,#eaf3ff,#fff 70%)}
+    .v3-decision.wide{grid-column:1/-1;display:grid;grid-template-columns:.8fr 1.2fr;gap:34px;align-items:end}
+    .v3-decision small{color:var(--v3-blue);font-size:12px;font-weight:700}
+    .v3-decision h3{max-width:18em;margin:13px 0 0;color:var(--v3-ink);font-size:24px;line-height:1.24}
+    .v3-decision p{margin:13px 0 0;color:var(--v3-muted);font-size:14px;line-height:1.68}
+    .v3-decision .artifact{margin-top:24px;padding-top:18px;border-top:1px solid var(--v3-line);color:var(--v3-ink);font-size:13px;font-weight:650}
+    .v3-decision.primary .signal{max-width:430px;padding:20px;border-radius:12px;background:#fff;border:1px solid rgba(36,88,166,.15)}
+    .v3-decision.primary .signal b{display:block;color:var(--v3-ink);font-size:15px}
+    .v3-decision.primary .signal span{display:block;margin-top:7px;color:var(--v3-muted);font-size:13px;line-height:1.6}
+
+    .v3-architecture{padding:30px;border:1px solid var(--v3-line);border-radius:var(--v3-radius);background:#fff}
+    .v3-flow{display:grid;grid-template-columns:1fr 42px 1fr 42px 1fr 42px 1fr 42px 1fr;align-items:stretch}
+    .v3-flow-node{min-height:180px;padding:20px;border:1px solid var(--v3-line);border-radius:12px;background:#fff}
+    .v3-flow-node.accent{border-color:rgba(36,88,166,.28);background:var(--v3-blue-soft)}
+    .v3-flow-node b{display:block;color:var(--v3-ink);font-size:16px}
+    .v3-flow-node span{display:block;margin-top:10px;color:var(--v3-muted);font-size:12.5px;line-height:1.58}
+    .v3-arrow{display:grid;place-items:center;color:var(--v3-blue);font-size:23px}
+    .v3-rail{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:14px;margin-top:18px}
+    .v3-rail article{padding:18px 20px;border-radius:12px;background:#1d3959;color:#fff}
+    .v3-rail article:nth-child(2){background:#285270}
+    .v3-rail article:nth-child(3){background:#226c7d}
+    .v3-rail b{display:block;font-size:14px}
+    .v3-rail span{display:block;margin-top:7px;color:rgba(255,255,255,.76);font-size:12px;line-height:1.55}
+    .v3-arch-note{margin:18px 0 0;color:var(--v3-muted);font-size:13px;line-height:1.65}
+
+    .v4-system{padding:30px;border:1px solid var(--v3-line);border-radius:var(--v3-radius);background:#fff;box-shadow:0 22px 60px rgba(30,63,105,.08)}
+    .v4-role-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+    .v4-role{padding:16px 18px;border-radius:12px;background:#f3f7fc}
+    .v4-role b{display:block;color:var(--v3-ink);font-size:14px}
+    .v4-role span{display:block;margin-top:6px;color:var(--v3-muted);font-size:12px;line-height:1.5}
+    .v4-role.business{border-left:4px solid #3a8f9f}
+    .v4-role.technical{border-left:4px solid #396fb7}
+    .v4-role.platform{border-left:4px solid #6459aa}
+    .v4-columns{display:grid;grid-template-columns:.92fr 1.18fr 1.05fr .85fr;gap:32px;position:relative}
+    .v4-column{position:relative;min-width:0;padding:22px;border-radius:14px}
+    .v4-column:not(:last-child)::after{content:"→";position:absolute;top:50%;right:-24px;transform:translateY(-50%);color:var(--v3-blue);font-size:22px;font-weight:700}
+    .v4-column.assets{background:#edf7f5;border:1px solid #cce7e1}
+    .v4-column.runtime{background:#eef4ff;border:1px solid #cfdcf2}
+    .v4-column.tools{background:#f3f1fb;border:1px solid #ddd7f0}
+    .v4-column.output{background:#f8f4ed;border:1px solid #eadfcd}
+    .v4-column h3{margin:0;color:var(--v3-ink);font-size:18px}
+    .v4-column>p{margin:8px 0 18px;color:var(--v3-muted);font-size:12px;line-height:1.55}
+    .v4-stack{display:grid;gap:9px}
+    .v4-unit{padding:12px 13px;border:1px solid rgba(73,103,140,.15);border-radius:10px;background:rgba(255,255,255,.82)}
+    .v4-unit b{display:block;color:var(--v3-ink);font-size:12.5px}
+    .v4-unit span{display:block;margin-top:4px;color:var(--v3-muted);font-size:11.5px;line-height:1.48}
+    .v4-context{margin-top:18px;padding:22px;border-radius:14px;background:#1f3c5b;color:#fff}
+    .v4-context-head{display:flex;justify-content:space-between;gap:24px;align-items:start}
+    .v4-context-head b{font-size:16px}
+    .v4-context-head span{max-width:48em;color:rgba(255,255,255,.72);font-size:12px;line-height:1.55}
+    .v4-context-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:16px}
+    .v4-context-grid article{padding:13px;border-radius:10px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.1)}
+    .v4-context-grid b{display:block;font-size:12px}
+    .v4-context-grid span{display:block;margin-top:5px;color:rgba(255,255,255,.68);font-size:10.5px;line-height:1.48}
+    .v4-governance{display:grid;grid-template-columns:1fr 34px 1fr 34px 1fr;align-items:center;margin-top:18px}
+    .v4-governance article{min-height:104px;padding:16px;border:1px solid var(--v3-line);border-radius:12px;background:#fff}
+    .v4-governance b{display:block;color:var(--v3-ink);font-size:13px}
+    .v4-governance span{display:block;margin-top:6px;color:var(--v3-muted);font-size:11.5px;line-height:1.5}
+    .v4-governance i{color:var(--v3-blue);font-size:19px;font-style:normal;text-align:center}
+    .v4-disclosures{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+    .v4-disclosures details{border:1px solid var(--v3-line);border-radius:12px;background:#fff}
+    .v4-disclosures summary{padding:15px 17px;color:var(--v3-ink);font-size:13px;font-weight:700;cursor:pointer}
+    .v4-disclosures .detail-body{padding:0 17px 17px;color:var(--v3-muted);font-size:12px;line-height:1.65}
+    .v4-disclosures .detail-body b{color:var(--v3-ink)}
+    .v4-source-note{margin:16px 0 0;color:var(--v3-muted);font-size:12px;line-height:1.6}
+
+    .v3-case{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(360px,.96fr);gap:42px;align-items:center}
+    .v3-case figure{margin:0;overflow:hidden;border:1px solid var(--v3-line);border-radius:var(--v3-radius);background:#fff;box-shadow:0 22px 54px rgba(30,63,105,.1)}
+    .v3-case img{display:block;width:100%;height:auto}
+    .v3-case-copy h2{margin:0;color:var(--v3-ink);font-size:clamp(28px,3vw,40px);line-height:1.18}
+    .v3-case-copy>p{margin:15px 0 0;color:var(--v3-muted);font-size:15px;line-height:1.7}
+    .v3-case-list{display:grid;gap:15px;margin-top:27px}
+    .v3-case-list div{padding:0 0 15px;border-bottom:1px solid var(--v3-line)}
+    .v3-case-list div:last-child{border-bottom:0}
+    .v3-case-list b{display:block;color:var(--v3-ink);font-size:14px}
+    .v3-case-list span{display:block;margin-top:6px;color:var(--v3-muted);font-size:13px;line-height:1.55}
+
+    .v3-evidence{display:grid;grid-template-columns:.72fr 1.28fr;gap:28px}
+    .v3-evidence-intro{padding:28px;border-radius:var(--v3-radius);background:#1d3959;color:#fff}
+    .v3-evidence-intro h2{margin:0;font-size:32px;line-height:1.18}
+    .v3-evidence-intro p{margin:14px 0 0;color:rgba(255,255,255,.75);font-size:14px;line-height:1.65}
+    .v3-evidence-list{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .v3-evidence-list article{padding:22px;border:1px solid var(--v3-line);border-radius:var(--v3-radius);background:#fff}
+    .v3-evidence-list b{color:var(--v3-ink);font-size:15px}
+    .v3-evidence-list p{margin:9px 0 0;color:var(--v3-muted);font-size:13px;line-height:1.6}
+
+    .v3-scope{display:grid;grid-template-columns:1.15fr .85fr;gap:36px;align-items:start}
+    .v3-scope h2{margin:0;color:var(--v3-ink);font-size:clamp(28px,3vw,40px);line-height:1.18}
+    .v3-scope p{margin:15px 0 0;color:var(--v3-muted);font-size:14px;line-height:1.7}
+    .v3-scope-panel{padding:25px;border:1px solid var(--v3-line);border-radius:var(--v3-radius);background:#fff}
+    .v3-scope-panel b{display:block;color:var(--v3-ink);font-size:15px}
+    .v3-scope-panel span{display:block;margin-top:9px;color:var(--v3-muted);font-size:13px;line-height:1.62}
+
+    @media(max-width:1080px){
+      .v3-hero-grid,.v3-case,.v3-evidence,.v3-scope{grid-template-columns:1fr}
+      .v3-hero h1{max-width:12em}
+      .v3-flow{grid-template-columns:1fr}
+      .v3-arrow{height:38px;transform:rotate(90deg)}
+      .v3-rail{grid-template-columns:1fr}
+      .v4-columns{grid-template-columns:1fr 1fr}
+      .v4-column:not(:last-child)::after{display:none}
+      .v4-context-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:760px){
+      .v3-hero{padding:42px 0}
+      .v3-hero-grid{gap:30px}
+      .v3-hero h1{font-size:38px;line-height:1.08}
+      .v3-hero .lead{font-size:15px}
+      .v3-proof figcaption{display:block}
+      .v3-proof figcaption span{display:block}
+      .v3-proof figcaption span+span{margin-top:5px}
+      .v3-section{padding:56px 0}
+      .v3-bento,.v3-evidence-list{grid-template-columns:1fr}
+      .v3-decision.primary{grid-row:auto;min-height:auto}
+      .v3-decision.wide{grid-column:auto;grid-template-columns:1fr}
+      .v3-architecture{padding:18px}
+      .v4-system{padding:16px}
+      .v4-role-strip,.v4-columns,.v4-context-grid,.v4-disclosures{grid-template-columns:1fr}
+      .v4-context-head{display:block}
+      .v4-context-head span{display:block;margin-top:8px}
+      .v4-governance{grid-template-columns:1fr}
+      .v4-governance i{padding:7px 0;transform:rotate(90deg)}
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <nav class="nav">
+    <div class="shell navin">
+      <a class="brand" href="index.html">
+        <span class="brandmark"><img src="guangsu-logo.svg" alt=""></span>
+        <span>光溯<small>故障诊断产品</small></span>
+      </a>
+      <div class="links">
+        <a href="index.html">产品概览</a>
+        <a aria-current="page" href="architecture-v4.html">架构设计</a>
+        <a href="case-study.html">诊断案例</a>
+        <a href="evidence.html">评测与治理</a>
+        <a class="demo" href="https://app.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="v3-hero">
+    <div class="shell v3-hero-grid">
+      <div>
+        <h1>把复杂诊断变成可运营的 Agent 产品</h1>
+        <p class="lead">场景可配置，能力可复用，工具受控连接，每次判断都能回到证据。</p>
+        <div class="v3-actions">
+          <a class="btn primary" href="case-study.html">查看诊断案例</a>
+          <a class="btn" href="#product-decisions">查看产品判断</a>
+        </div>
+      </div>
+      <figure class="v3-proof">
+        <img src="assets/hero-cross-layer.png" alt="光溯跨层诊断工作台">
+        <figcaption><span>一条业务问题，跨多个技术层取证</span><span>匿名模拟数据</span></figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="v3-section" id="product-decisions">
+      <div class="shell">
+        <div class="v3-heading">
+          <span class="label">核心判断</span>
+          <h2>平台能力不是组件数量，而是四个可验证的产品选择</h2>
+          <p>我重点处理的不是模型如何回答，而是业务知识如何进入系统、能力如何扩展、工具如何受控、质量如何持续治理。</p>
+        </div>
+        <div class="v3-bento">
+          <article class="v3-decision primary">
+            <div>
+              <small>业务抽象与规模化</small>
+              <h3>把专家经验转成可维护的场景资产</h3>
+              <p>业务人员维护场景与入口字段，技术人员维护链路、节点检索和字段接力。新增场景不再依赖手写 JSON 或复制整套流程。</p>
+            </div>
+            <div class="signal">
+              <b>代表产物</b>
+              <span>Scene Package、链路拓扑、节点检索配方、跨节点关联计划</span>
+            </div>
+          </article>
+          <article class="v3-decision">
+            <small>Agent 边界</small>
+            <h3>固定主流程，按证据调度专业能力</h3>
+            <p>场景确认、证据采集和报告门禁不可跳过。专项 Skill 只有在证据满足条件时才触发。</p>
+            <div class="artifact">证明：路径可回放，未触发分支有原因</div>
+          </article>
+          <article class="v3-decision">
+            <small>企业连接</small>
+            <h3>Skill 管诊断方法，MCP 管工具访问</h3>
+            <p>能力不保存生产地址和凭据。工具运行时统一处理权限、参数校验、超时和错误。</p>
+            <div class="artifact">证明：工具可替换，诊断合同保持稳定</div>
+          </article>
+          <article class="v3-decision wide">
+            <div>
+              <small>运行时与质量</small>
+              <h3>上下文、证据与评测形成同一条闭环</h3>
+            </div>
+            <div>
+              <p>每个 Skill 只获得最小必要上下文。原始日志进入证据存储，工作状态只保留摘要和引用。Trace 记录场景版本、能力版本、工具调用和结论门禁，失败可以归因并进入回归。</p>
+              <div class="artifact">证明：不是一次性回答，而是可以治理和迭代的企业 Agent 运行机制</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="v3-section alt">
+      <div class="shell">
+        <div class="v3-heading">
+          <h2>一张主图，只解释职责边界</h2>
+          <p>完整工程细节留在深挖材料。公开页面只需要让读者理解每一层解决什么问题，以及它们如何共同约束一次诊断。</p>
+        </div>
+        <div class="v3-architecture" aria-label="光溯企业 Agent 产品简化架构">
+          <div class="v3-flow">
+            <article class="v3-flow-node accent"><b>场景资产</b><span>业务场景、动态字段、链路、节点检索和关联规则</span></article>
+            <div class="v3-arrow">→</div>
+            <article class="v3-flow-node"><b>Workflow / Harness</b><span>读取配置，控制顺序、确认点、权限和证据门禁</span></article>
+            <div class="v3-arrow">→</div>
+            <article class="v3-flow-node accent"><b>Reusable Skills</b><span>请求理解、跨节点关联、RPC 诊断、网络核查和报告生成</span></article>
+            <div class="v3-arrow">→</div>
+            <article class="v3-flow-node"><b>MCP Tools</b><span>日志、知识库、服务状态和网络探针的受控访问</span></article>
+            <div class="v3-arrow">→</div>
+            <article class="v3-flow-node accent"><b>证据化结果</b><span>候选原因、证据引用、待核动作、人工复核和反馈</span></article>
+          </div>
+          <div class="v3-rail">
+            <article><b>Diagnostic Context</b><span>本次诊断已经确认的场景、字段、状态和派生标识</span></article>
+            <article><b>Evidence + Trace</b><span>记录日志、知识、工具结果、跳过原因和版本</span></article>
+            <article><b>Eval + Feedback</b><span>检查路径、证据、禁止断言，推动配置、能力和知识迭代</span></article>
+          </div>
+          <p class="v3-arch-note">读图顺序：左侧是可运营的业务资产，中间是受控的 Agent 执行，右侧是企业系统连接与结果。底部负责上下文和质量治理。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="v3-section">
+      <div class="shell">
+        <div class="v3-heading">
+          <h2>谁配置什么，系统如何在运行时组装</h2>
+          <p>这张网页架构从场景资产协同图转化而来。它把维护角色、配置资产、Agent 运行时、MCP 工具、上下文和质量治理放进同一条可追踪关系。</p>
+        </div>
+        <div class="v4-system" aria-label="光溯场景资产、Skill、MCP 与上下文协同架构">
+          <div class="v4-role-strip">
+            <article class="v4-role business"><b>业务 / 测试 Owner</b><span>维护场景、用户现象、入口字段和业务负责人</span></article>
+            <article class="v4-role technical"><b>技术 / 应用 Owner</b><span>维护拓扑、数据来源、节点检索和字段接力</span></article>
+            <article class="v4-role platform"><b>AI 产品 / 平台 Owner</b><span>治理 Workflow、Skills、MCP 策略、评测和发布</span></article>
+          </div>
+
+          <div class="v4-columns">
+            <section class="v4-column assets">
+              <h3>场景资产工作台</h3>
+              <p>面向业务和技术角色的可见配置层</p>
+              <div class="v4-stack">
+                <article class="v4-unit"><b>Scene Package</b><span>场景定义、动态字段、必填条件和敏感级别</span></article>
+                <article class="v4-unit"><b>Topology</b><span>应用节点、上下游关系、负责人和版本</span></article>
+                <article class="v4-unit"><b>Node Query Recipe</b><span>数据源、检索键组合和可提取的新标识</span></article>
+                <article class="v4-unit"><b>Correlation Plan</b><span>Trace 中断后的替代键、下一跳映射和失败策略</span></article>
+                <article class="v4-unit"><b>Binding Policy</b><span>允许使用的能力、工具、版本和权限范围</span></article>
+              </div>
+            </section>
+
+            <section class="v4-column runtime">
+              <h3>Workflow / Harness</h3>
+              <p>把场景配置组装成可控的诊断任务</p>
+              <div class="v4-stack">
+                <article class="v4-unit"><b>确定性主流程</b><span>场景确认、链路取证、条件分支和报告门禁</span></article>
+                <article class="v4-unit"><b>Skill Registry</b><span>请求理解、逐跳关联、RPC 诊断、网络核查和证据报告</span></article>
+                <article class="v4-unit"><b>Context Projector</b><span>只给当前 Skill 必要字段、证据摘要和安全值引用</span></article>
+                <article class="v4-unit"><b>Skill 与 MCP 协同</b><span>Skill 决定为何调用，Runtime 负责参数、权限和执行</span></article>
+              </div>
+            </section>
+
+            <section class="v4-column tools">
+              <h3>MCP Tool Runtime</h3>
+              <p>标准化连接企业系统并控制访问边界</p>
+              <div class="v4-stack">
+                <article class="v4-unit"><b>Tool Gateway</b><span>工具发现、Schema 校验、鉴权、超时和降级</span></article>
+                <article class="v4-unit"><b>只读诊断工具</b><span>日志查询、知识检索、服务状态、网络探针和配置对比</span></article>
+                <article class="v4-unit"><b>企业数据系统</b><span>日志平台、CMDB、知识库、监控、注册中心和配置中心</span></article>
+                <article class="v4-unit"><b>安全边界</b><span>Skill 不保存凭据，敏感标识不进入 LLM 明文上下文</span></article>
+              </div>
+            </section>
+
+            <section class="v4-column output">
+              <h3>证据化结果</h3>
+              <p>面向用户和专家的分层输出</p>
+              <div class="v4-stack">
+                <article class="v4-unit"><b>AI 决策卡</b><span>候选原因、关键证据和待核动作</span></article>
+                <article class="v4-unit"><b>人工复核</b><span>证据不足或关联不唯一时保留候选</span></article>
+                <article class="v4-unit"><b>Diagnostic Trace</b><span>记录调用、派生字段、跳过原因和证据引用</span></article>
+                <article class="v4-unit"><b>反馈回流</b><span>经专家复核后进入配置、知识和能力迭代</span></article>
+              </div>
+            </section>
+          </div>
+
+          <section class="v4-context">
+            <div class="v4-context-head">
+              <b>Context, State & Evidence</b>
+              <span>上下文不是不断变长的聊天记录，而是按职责拆分的运行状态。每个 Skill 只读取完成当前任务需要的部分。</span>
+            </div>
+            <div class="v4-context-grid">
+              <article><b>Run Context</b><span>身份、权限、环境、版本和预算</span></article>
+              <article><b>Working State</b><span>场景、动态字段、当前节点和路由</span></article>
+              <article><b>Correlation Ledger</b><span>标识来源、转换、证据和置信度</span></article>
+              <article><b>Evidence / Artifact</b><span>日志原文、工具输出和证据引用</span></article>
+              <article><b>Checkpoint / Trace</b><span>暂停恢复、审计、回放和失败归因</span></article>
+            </div>
+          </section>
+
+          <div class="v4-governance">
+            <article><b>发布前验证</b><span>正常命中、缺字段、Trace 中断、多命中和权限异常样例共同签核</span></article>
+            <i>→</i>
+            <article><b>评测与失败归因</b><span>区分场景配置、关联计划、Skill、MCP、上下文和 Workflow 错误</span></article>
+            <i>→</i>
+            <article><b>版本化反馈</b><span>修复资产、能力、工具或门禁后重新回放，支持复测与回滚</span></article>
+          </div>
+
+          <div class="v4-disclosures">
+            <details>
+              <summary>Skill 和 MCP 为什么不能合并</summary>
+              <div class="detail-body"><b>Skill 表达诊断方法。</b>它决定什么时候调用工具、如何组合结果以及如何解释证据。<br><b>MCP 表达工具连接。</b>它负责发现、鉴权、参数校验、执行和错误返回。同一个 Skill 可以调用多个工具，同一个工具也可以被多个 Skills 复用。</div>
+            </details>
+            <details>
+              <summary>这套架构如何接入当前 Demo</summary>
+              <div class="detail-body">当前 LinkCanvas 继续承载节点和上下游关系，保留日志来源、路径、负责人和关键字。后续增加场景入口字段、检索键组合、可提取标识、下一跳规则、只读能力卡、MCP 绑定状态和 Dry Run，不推翻现有画布。</div>
+            </details>
+          </div>
+          <p class="v4-source-note">公开边界：场景资产、Skill / MCP 协同和完整上下文治理包含当前产品抽象与演进设计。公开 Demo 使用匿名模拟数据，不表述为已经接入生产系统。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="v3-section">
+      <div class="shell v3-case">
+        <figure><img src="assets/execution-trace.png" alt="光溯诊断执行 Trace"></figure>
+        <div class="v3-case-copy">
+          <h2>架构能力必须落到一条真实可解释的路径</h2>
+          <p>手机银行登录案例不用于证明组件齐全，而用于证明系统知道何时继续、何时停止、为什么得出当前判断。</p>
+          <div class="v3-case-list">
+            <div><b>上下文构建</b><span>从模糊报错、环境和入口关键字形成可执行的诊断任务。</span></div>
+            <div><b>跨节点取证</b><span>沿业务链路检索日志并派生技术标识，避免只依赖用户直接提供 Trace ID。</span></div>
+            <div><b>条件能力调度</b><span>证据不满足时跳过网络与系统诊断，并在 Trace 中记录原因。</span></div>
+            <div><b>报告门禁</b><span>RPC 超时保留为候选原因，不直接升级为确定网络根因。</span></div>
+          </div>
+          <div class="v3-actions"><a class="btn primary" href="case-study.html">查看完整回放</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="v3-section alt">
+      <div class="shell v3-evidence">
+        <div class="v3-evidence-intro">
+          <h2>用产物证明能力，不用术语堆满页面</h2>
+          <p>每项能力都对应一个产品决策、一份可检查的产物和一条运行证据。</p>
+        </div>
+        <div class="v3-evidence-list">
+          <article><b>业务与技术共同维护</b><p>链路画布、场景输入合同和节点检索配方，证明复杂知识被组织成可运营资产。</p></article>
+          <article><b>Agent 行为可控制</b><p>Workflow、条件 Skills 和报告门禁，证明模型不能跳过关键步骤自由下结论。</p></article>
+          <article><b>企业工具可治理</b><p>MCP 工具目录、权限和调用 Trace，证明连接能力与诊断逻辑彼此解耦。</p></article>
+          <article><b>质量能够持续迭代</b><p>Gold Contract、Run Trace 和失败归因，证明版本变化可以回放、比较和阻断回归。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="v3-section">
+      <div class="shell v3-scope">
+        <div>
+          <h2>公开作品集讲判断，深挖材料讲完整工程</h2>
+          <p>公开页面只保留核心边界和代表案例。完整的场景资产模型、Skill / MCP 协同、上下文生命周期和评测合同，作为面试追问时的深度证据，不要求每位读者一次读完。</p>
+          <div class="v3-actions">
+            <a class="btn primary" href="evidence.html">查看质量治理</a>
+            <a class="btn" href="https://app.litrace.site/" target="_blank" rel="noreferrer">体验 Demo</a>
+          </div>
+        </div>
+        <aside class="v3-scope-panel">
+          <b>公开边界</b>
+          <span>公开 Demo 使用匿名模拟数据展示产品机制。场景配置、Skill / MCP Runtime 和完整上下文治理包含当前设计与演进目标，不表述为已接入生产系统。</span>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell footin">
+      <div class="foot-links">
+        <span class="copyright">Wang Yuxuan</span>
+        <a href="resume/" target="_blank" rel="noreferrer">Resume</a>
+        <a href="mailto:wangyx9621@163.com">Email</a>
+        <a href="index.html">返回产品概览</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
